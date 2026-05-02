@@ -649,6 +649,47 @@ a:hover { text-decoration: underline; }
   color: #fff;
   text-decoration: none;
 }
+
+/* Action-Buttons (MOIA-Route + Karte öffnen) */
+.gmaps__actions {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  border-top: 2px solid var(--border);
+}
+.gmaps__action {
+  padding: .85rem 1rem;
+  font-weight: 700;
+  font-size: .85rem;
+  text-align: center;
+  transition: background var(--transition), color var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gmaps__action--route {
+  background: linear-gradient(135deg, #00C2A8 0%, #009e89 100%);
+  color: #fff;
+  border-right: 2px solid var(--border);
+}
+.gmaps__action--route:hover {
+  background: linear-gradient(135deg, #00d4b8 0%, #00b39c 100%);
+  color: #fff;
+  text-decoration: none;
+}
+.gmaps__action--view {
+  background: var(--surface);
+  color: var(--primary);
+}
+.gmaps__action--view:hover {
+  background: var(--primary);
+  color: #fff;
+  text-decoration: none;
+}
+@media (max-width: 380px) {
+  .gmaps__actions { grid-template-columns: 1fr; }
+  .gmaps__action--route { border-right: none; border-bottom: 2px solid var(--border); }
+}
 [data-theme="dark"] .gmaps__frame-wrap iframe {
   filter: brightness(.85) saturate(.9);
 }
