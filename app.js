@@ -494,6 +494,7 @@ function renderEvents() {
 
 function renderGallery() {
   const grid = document.getElementById("galleryGrid");
+  if (!grid) return; // LightWidget übernimmt jetzt die Galerie
   grid.innerHTML = GALLERY_ITEMS.map((item, i) => `
     <div class="gallery__item"
          tabindex="0"
