@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DGS Stammtisch Hamburg</title>
-  <meta name="description" content="Stammtisch für Deutsche Gebärdensprache in Hamburg und Umgebung – Termine, Events, Galerie und Treffpunkte auf der Karte." />
+  <title>DGS Stammtisch Hamburg &amp; Umgebung</title>
+  <meta name="description" content="DGS Stammtisch Hamburg und Umgebung – Termine, Events, Galerie und Treffpunkte auf der Karte. Offen für Gehörlose, Schwerhörige, Hörende und alle, die Gebärdensprache lieben." />
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#2563eb" id="themeColorMeta" />
+  <meta name="theme-color" content="#1e3a8a" id="themeColorMeta" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -29,7 +29,7 @@
   <header class="header" id="top">
     <nav class="nav container">
       <a href="#top" class="nav__logo">
-        <span class="logo-icon">👋</span>
+        <img src="icons/logo.png" alt="" class="nav__logo-img" />
         <span>DGS&nbsp;Stammtisch&nbsp;HH</span>
       </a>
       <div class="nav__actions">
@@ -55,9 +55,9 @@
   <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="hero__content container">
-      <p class="hero__tag">Hamburg &amp; Umgebung</p>
-      <h1 class="hero__title">Stammtisch für<br><span class="accent">Deutsche Gebärdensprache</span></h1>
-      <p class="hero__sub">Trefft euch, tauscht euch aus und lernt gemeinsam – offen für Gehörlose, Schwerhörige, Hörende und alle, die DGS lieben.</p>
+      <img src="icons/logo.png" alt="DGS Stammtisch Hamburg & Umgebung" class="hero__logo" />
+      <h1 class="hero__title">DGS Stammtisch<br><span class="accent">Hamburg &amp; Umgebung</span></h1>
+      <p class="hero__sub">Trefft euch, tauscht euch aus und lernt gemeinsam – offen für Gehörlose, Schwerhörige, Hörende und alle, die Deutsche Gebärdensprache lieben.</p>
       <div class="hero__cta">
         <a href="#termine" class="btn btn--primary">Nächste Termine</a>
         <a href="#karte" class="btn btn--outline">Karte ansehen</a>
@@ -211,10 +211,31 @@
       <div class="kontakt__text">
         <h2 class="section__title">Kontakt &amp; <span class="accent">Mitmachen</span></h2>
         <p>Ihr wollt einen neuen Stammtisch eintragen, Fotos einsenden oder einfach Hallo sagen? Schreibt uns eine Nachricht.</p>
+
+        <a class="whatsapp-channel" href="https://whatsapp.com/channel/0029VbCUTohElagnY1hFMN0G" target="_blank" rel="noopener noreferrer">
+          <span class="whatsapp-channel__icon">💬</span>
+          <span>
+            Unserem WhatsApp-Channel folgen
+            <span class="whatsapp-channel__small">Alle Termine &amp; News direkt aufs Handy</span>
+          </span>
+        </a>
+
         <ul class="kontakt__list">
           <li>📧 <a href="mailto:info@dgs-stammtisch-hamburg.de">info@dgs-stammtisch-hamburg.de</a></li>
           <li>📸 Instagram: <a href="#" aria-label="Instagram (Platzhalter)">@dgs_stammtisch_hh</a></li>
         </ul>
+
+        <div class="team">
+          <p class="team__title">👋 Admin-Team</p>
+          <p class="team__sub">Wir sind eure Ansprechpartner – sprecht uns einfach an, wenn ihr Fragen, Vorschläge oder Themen habt.</p>
+          <ul class="team__list">
+            <li class="team__member"><span class="team__avatar" data-color="0">R</span><span class="team__name">Rainer</span></li>
+            <li class="team__member"><span class="team__avatar" data-color="1">M</span><span class="team__name">Merle</span></li>
+            <li class="team__member"><span class="team__avatar" data-color="2">H</span><span class="team__name">Hannes</span></li>
+            <li class="team__member"><span class="team__avatar" data-color="3">R</span><span class="team__name">Richard</span></li>
+            <li class="team__member"><span class="team__avatar" data-color="4">S</span><span class="team__name">Stephan</span></li>
+          </ul>
+        </div>
       </div>
       <form class="kontakt__form" id="kontaktForm" novalidate>
         <label for="name">Name</label>
@@ -291,7 +312,13 @@
   <!-- ===== FOOTER ===== -->
   <footer class="footer">
     <div class="container footer__inner">
-      <p>© 2026 DGS Stammtisch Hamburg &amp; Umgebung</p>
+      <div class="footer__brand">
+        <img src="icons/logo.png" alt="" class="footer__logo" />
+        <div>
+          <strong>DGS Stammtisch</strong><br>
+          <span class="footer__sub">Hamburg &amp; Umgebung</span>
+        </div>
+      </div>
       <nav aria-label="Footer-Navigation">
         <a href="#treffpunkte">Treffpunkte</a>
         <a href="#termine">Termine</a>
@@ -300,6 +327,7 @@
         <a href="#karte">Karte</a>
         <a href="#kontakt">Kontakt</a>
       </nav>
+      <p class="footer__copy">© 2026 · Mit 👋 gemacht vom Admin-Team</p>
     </div>
   </footer>
 
