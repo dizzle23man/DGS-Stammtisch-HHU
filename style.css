@@ -573,6 +573,156 @@ a:hover { text-decoration: underline; }
   border-radius: var(--radius);
 }
 
+/* ===== AKTUELLES (Telegram News) ===== */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+.news-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: box-shadow var(--transition), transform var(--transition);
+  min-height: 100px;
+  position: relative;
+}
+.news-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.news-card iframe {
+  display: block;
+  width: 100% !important;
+  border: 0 !important;
+  border-radius: var(--radius);
+}
+.news-card:has(script:only-child)::before,
+.news-card:empty::before {
+  content: "📰 Lade Telegram-Post …";
+  display: block;
+  color: var(--text-muted);
+  font-size: .9rem;
+  font-style: italic;
+  text-align: center;
+  padding: 1.75rem 1rem;
+}
+.news-empty {
+  grid-column: 1 / -1;
+  background: var(--bg-alt);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .95rem;
+}
+.news-empty a { color: var(--primary); font-weight: 700; }
+.news-cta {
+  display: flex;
+  justify-content: center;
+}
+.news-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .9rem 1.6rem;
+  background: linear-gradient(135deg, #229ED9 0%, #1c8cc0 100%);
+  color: #fff !important;
+  border-radius: 2rem;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 6px 22px rgba(34,158,217,0.35);
+  transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+.news-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(34,158,217,0.5);
+  text-decoration: none;
+}
+.news-btn__icon { font-size: 1.4rem; line-height: 1; }
+.news-btn__small { font-size: .75rem; opacity: .9; font-weight: 600; display: block; margin-top: 1px; }
+
+/* ===== INSTAGRAM-FEED ===== */
+.insta-feed {
+  margin-bottom: 1.5rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  min-height: 200px;
+}
+.insta-feed iframe {
+  display: block;
+  width: 100%;
+}
+.insta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .55rem 1.1rem;
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #fff !important;
+  border-radius: 2rem;
+  font-weight: 700;
+  font-size: .9rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+.insta-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(220,39,67,0.4);
+  text-decoration: none;
+}
+
+/* ===== KANAL-BUTTONS (WhatsApp + Telegram in Kontakt) ===== */
+.channel-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: .75rem;
+  margin: 1.25rem 0 1.75rem;
+}
+.channel-btn {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .8rem 1.1rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: .92rem;
+  color: #fff !important;
+  text-decoration: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+  line-height: 1.25;
+}
+.channel-btn:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+.channel-btn__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.channel-btn__small {
+  font-size: .72rem;
+  opacity: .9;
+  font-weight: 600;
+  display: block;
+  margin-top: 1px;
+}
+.channel-btn--whatsapp {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  box-shadow: 0 4px 16px rgba(37,211,102,0.32);
+}
+.channel-btn--whatsapp:hover { box-shadow: 0 6px 22px rgba(37,211,102,0.5); }
+.channel-btn--telegram {
+  background: linear-gradient(135deg, #229ED9 0%, #1c8cc0 100%);
+  box-shadow: 0 4px 16px rgba(34,158,217,0.32);
+}
+.channel-btn--telegram:hover { box-shadow: 0 6px 22px rgba(34,158,217,0.5); }
+
 /* ===== GOOGLE MAPS ÜBERSICHT ===== */
 .gmaps__grid {
   display: grid;

@@ -129,6 +129,15 @@ const EVENTS = [
   }
 ];
 
+// Telegram-Posts für die "Aktuelles"-Sektion
+// 👉 Neuer Post? Hier oben die ID einfügen (Format: "kanal/postid")
+//    Post-ID findest du in der URL eines Telegram-Posts (t.me/dgs_stammtisch_hhu/3 → 3)
+//    Service-Messages (Channel-Erstellung etc.) NICHT eintragen.
+const TELEGRAM_POSTS = [
+  "dgs_stammtisch_hhu/2"
+];
+const TELEGRAM_CHANNEL = "dgs_stammtisch_hhu";
+
 // Stammtische mit Koordinaten für die Karte
 const LOCATIONS = [
   {
@@ -660,6 +669,8 @@ function initTheme() {
     root.setAttribute("data-theme", next);
     localStorage.setItem("theme", next);
     btn.setAttribute("aria-label", next === "dark" ? "Lightmode aktivieren" : "Darkmode aktivieren");
+    // Telegram-Widgets neu rendern, damit sie das richtige Theme nutzen
+    renderTelegramFeed();
   });
 
   // Auf System-Änderungen reagieren (falls kein gespeicherter Wert)
@@ -752,8 +763,47 @@ function initPWA() {
 
 // ── Init ────────────────────────────────────────────
 
+function isDarkMode() {
+  const t = document.documentElement.dataset.theme;
+  if (t === "dark")  return true;
+  if (t === "light") return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function renderTelegramFeed() {
+  const grid = document.getElementById("newsGrid");
+  if (!grid) return;
+
+  if (!TELEGRAM_POSTS.length) {
+    grid.innerHTML = `<p class="news-empty">Noch keine Posts. <a href="https://t.me/${TELEGRAM_CHANNEL}" target="_blank" rel="noopener">Folge unserem Telegram-Kanal</a> für die ersten News.</p>`;
+    return;
+  }
+
+  const dark = isDarkMode();
+  grid.innerHTML = "";
+
+  TELEGRAM_POSTS.forEach(post => {
+    const card = document.createElement("div");
+    card.className = "news-card";
+
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = "https://telegram.org/js/telegram-widget.js?22";
+    s.dataset.telegramPost = post;
+    s.dataset.width = "100%";
+    s.dataset.userpic = "true";
+    s.dataset.color = "1e3a8a";
+    s.dataset.darkColor = "60a5fa";
+    if (dark) s.dataset.dark = "1";
+
+    card.appendChild(s);
+    grid.appendChild(card);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
+  renderTelegramFeed();
   renderTermine();
   renderEvents();
   renderGallery();
