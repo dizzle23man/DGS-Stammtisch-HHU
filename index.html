@@ -42,6 +42,7 @@
         </button>
       </div>
       <ul class="nav__links" id="navLinks">
+        <li><a href="#aktuelles">Aktuelles</a></li>
         <li><a href="#treffpunkte">Treffpunkte</a></li>
         <li><a href="#termine">Termine</a></li>
         <li><a href="#events">Events</a></li>
@@ -67,6 +68,45 @@
       <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
         <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg)"/>
       </svg>
+    </div>
+  </section>
+
+  <!-- ===== AKTUELLES (Telegram-Channel) ===== -->
+  <section class="section" id="aktuelles">
+    <div class="container">
+      <h2 class="section__title">📰 <span class="accent">Aktuelles</span></h2>
+      <p class="section__sub">Wichtige News &amp; Ankündigungen direkt aus unserem Telegram-Kanal.</p>
+
+      <div class="news-grid">
+        <!-- 👉 Telegram-Posts: Channel-Name + Post-ID nach Bedarf anpassen -->
+        <!-- Format: data-telegram-post="KANAL/POSTID" – z.B. "dgs_stammtisch_hhu/12" -->
+        <div class="news-card">
+          <script async src="https://telegram.org/js/telegram-widget.js?22"
+                  data-telegram-post="dgs_stammtisch_hhu/2"
+                  data-width="100%"
+                  data-userpic="true"
+                  data-color="1e3a8a"
+                  data-dark-color="60a5fa"></script>
+        </div>
+        <div class="news-card">
+          <script async src="https://telegram.org/js/telegram-widget.js?22"
+                  data-telegram-post="dgs_stammtisch_hhu/1"
+                  data-width="100%"
+                  data-userpic="true"
+                  data-color="1e3a8a"
+                  data-dark-color="60a5fa"></script>
+        </div>
+      </div>
+
+      <div class="news-cta">
+        <a class="btn news-btn" href="https://t.me/dgs_stammtisch_hhu" target="_blank" rel="noopener noreferrer">
+          <span class="news-btn__icon">📨</span>
+          <span>
+            Telegram-Kanal folgen
+            <span class="news-btn__small">Push-News &amp; alle Posts auf einen Blick</span>
+          </span>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -183,15 +223,39 @@
     </div>
   </section>
 
-  <!-- ===== GALERIE ===== -->
+  <!-- ===== GALERIE (Instagram LightWidget) ===== -->
   <section class="section" id="galerie">
     <div class="container">
-      <h2 class="section__title"><span class="accent">Galerie</span></h2>
-      <p class="section__sub">Eindrücke aus unseren Treffen.</p>
-      <div class="gallery__grid" id="galleryGrid">
-        <!-- Platzhalter-Kacheln -->
+      <h2 class="section__title">📸 <span class="accent">Galerie</span></h2>
+      <p class="section__sub">Eindrücke aus unseren Treffen – live aus unserem Instagram-Account.</p>
+
+      <!--
+        👉 LightWidget-Iframe einrichten:
+        1. lightwidget.com → Account anlegen (kostenlos)
+        2. Instagram-Account verbinden (@dgs_stammtisch_hhu)
+        3. Widget-Style auswählen (Grid/Slider/Karussell)
+        4. Du bekommst eine URL wie https://cdn.lightwidget.com/widgets/abc123.html
+        5. Diese URL unten einsetzen, dann die "gallery__grid"-Box (Fallback) entfernen
+      -->
+      <div class="insta-feed">
+        <iframe src="https://cdn.lightwidget.com/widgets/PLATZHALTER.html"
+                scrolling="no"
+                allowtransparency="true"
+                class="lightwidget-widget"
+                style="width:100%;border:0;overflow:hidden;"
+                title="Instagram-Feed DGS Stammtisch"></iframe>
       </div>
-      <p class="gallery__hint">Fotos werden nach und nach ergänzt. Habt ihr Bilder? <a href="#kontakt">Schreibt uns!</a></p>
+
+      <!-- Fallback (zeigt Platzhalter-Emojis solange LightWidget nicht eingerichtet ist) -->
+      <div class="gallery__grid" id="galleryGrid">
+        <!-- per JS gefüllt -->
+      </div>
+
+      <p class="gallery__hint">
+        <a class="insta-link" href="https://www.instagram.com/dgs_stammtisch_hhu/" target="_blank" rel="noopener noreferrer">
+          📸 @dgs_stammtisch_hhu auf Instagram folgen
+        </a>
+      </p>
     </div>
   </section>
 
@@ -212,17 +276,26 @@
         <h2 class="section__title">Kontakt &amp; <span class="accent">Mitmachen</span></h2>
         <p>Ihr wollt einen neuen Stammtisch eintragen, Fotos einsenden oder einfach Hallo sagen? Schreibt uns eine Nachricht.</p>
 
-        <a class="whatsapp-channel" href="https://whatsapp.com/channel/0029VbCUTohElagnY1hFMN0G" target="_blank" rel="noopener noreferrer">
-          <span class="whatsapp-channel__icon">💬</span>
-          <span>
-            Unserem WhatsApp-Channel folgen
-            <span class="whatsapp-channel__small">Alle Termine &amp; News direkt aufs Handy</span>
-          </span>
-        </a>
+        <div class="channel-buttons">
+          <a class="channel-btn channel-btn--whatsapp" href="https://whatsapp.com/channel/0029VbCUTohElagnY1hFMN0G" target="_blank" rel="noopener noreferrer">
+            <span class="channel-btn__icon">💬</span>
+            <span>
+              WhatsApp-Channel
+              <span class="channel-btn__small">Termine &amp; News aufs Handy</span>
+            </span>
+          </a>
+          <a class="channel-btn channel-btn--telegram" href="https://t.me/dgs_stammtisch_hhu" target="_blank" rel="noopener noreferrer">
+            <span class="channel-btn__icon">📨</span>
+            <span>
+              Telegram-Kanal
+              <span class="channel-btn__small">Längere News &amp; Diskussion</span>
+            </span>
+          </a>
+        </div>
 
         <ul class="kontakt__list">
           <li>📧 <a href="mailto:info@dgs-stammtisch-hamburg.de">info@dgs-stammtisch-hamburg.de</a></li>
-          <li>📸 Instagram: <a href="#" aria-label="Instagram (Platzhalter)">@dgs_stammtisch_hh</a></li>
+          <li>📸 Instagram: <a href="#" aria-label="Instagram (Platzhalter)">@dgs_stammtisch_hhu</a></li>
         </ul>
 
         <div class="team">
@@ -359,6 +432,7 @@
         </div>
       </div>
       <nav aria-label="Footer-Navigation">
+        <a href="#aktuelles">Aktuelles</a>
         <a href="#treffpunkte">Treffpunkte</a>
         <a href="#termine">Termine</a>
         <a href="#events">Events</a>
