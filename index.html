@@ -229,26 +229,14 @@
       <h2 class="section__title">📸 <span class="accent">Galerie</span></h2>
       <p class="section__sub">Eindrücke aus unseren Treffen – live aus unserem Instagram-Account.</p>
 
-      <!--
-        👉 LightWidget-Iframe einrichten:
-        1. lightwidget.com → Account anlegen (kostenlos)
-        2. Instagram-Account verbinden (@dgs_stammtisch_hhu)
-        3. Widget-Style auswählen (Grid/Slider/Karussell)
-        4. Du bekommst eine URL wie https://cdn.lightwidget.com/widgets/abc123.html
-        5. Diese URL unten einsetzen, dann die "gallery__grid"-Box (Fallback) entfernen
-      -->
+      <!-- LightWidget Instagram-Feed -->
       <div class="insta-feed">
-        <iframe src="https://cdn.lightwidget.com/widgets/PLATZHALTER.html"
+        <iframe src="https://lightwidget.com/widgets/4812d5ae1600594d80f9ab664223b760.html"
                 scrolling="no"
                 allowtransparency="true"
                 class="lightwidget-widget"
                 style="width:100%;border:0;overflow:hidden;"
                 title="Instagram-Feed DGS Stammtisch"></iframe>
-      </div>
-
-      <!-- Fallback (zeigt Platzhalter-Emojis solange LightWidget nicht eingerichtet ist) -->
-      <div class="gallery__grid" id="galleryGrid">
-        <!-- per JS gefüllt -->
       </div>
 
       <p class="gallery__hint">
@@ -446,6 +434,8 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- LightWidget Auto-Resize -->
+  <script src="https://cdn.lightwidget.com/widgets/lightwidget.js" defer></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
