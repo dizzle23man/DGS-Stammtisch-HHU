@@ -232,6 +232,19 @@
     </div>
   </section>
 
+  <!-- ===== NAME MODAL (für RSVP) ===== -->
+  <div class="install-modal" id="nameModal" role="dialog" aria-modal="true" aria-label="Name eingeben">
+    <div class="install-modal__box">
+      <h3>Wie heißt du?</h3>
+      <p class="name-modal__hint">Damit andere sehen, wer kommt. Wird nur einmal gefragt und bleibt auf deinem Gerät.</p>
+      <input type="text" id="nameInput" class="name-modal__input" placeholder="Vorname" maxlength="40" autocomplete="given-name" />
+      <div class="name-modal__actions">
+        <button class="btn btn--outline" id="nameCancel">Abbrechen</button>
+        <button class="btn btn--primary" id="nameOk">OK</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== INSTALL MODAL EDGE ===== -->
   <div class="install-modal" id="edgeModal" role="dialog" aria-modal="true" aria-label="App in Edge installieren">
     <div class="install-modal__box">
@@ -292,6 +305,6 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
