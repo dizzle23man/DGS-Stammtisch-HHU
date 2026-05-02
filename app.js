@@ -761,4 +761,60 @@ document.addEventListener("DOMContentLoaded", () => {
   initForm();
   initPWA();
   initRsvpSubscription();
+  initNavModal();
 });
+
+// ── Navigation-App-Auswahl ─────────────────────────
+
+function initNavModal() {
+  const modal = document.getElementById("navModal");
+  if (!modal) return;
+  const closeBtn = document.getElementById("navModalClose");
+  const addrEl   = document.getElementById("navModalAddress");
+
+  // Klick auf jeden 🧭-Button öffnet das Modal
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".gmaps__nav-btn");
+    if (!btn) return;
+    const address = btn.dataset.address;
+    const lat     = btn.dataset.lat;
+    const lng     = btn.dataset.lng;
+    const name    = btn.dataset.name || address;
+
+    addrEl.textContent = `📍 ${address}`;
+    setNavLinks(modal, { address, lat, lng, name });
+    modal.classList.add("open");
+  });
+
+  // Schließen
+  closeBtn?.addEventListener("click", () => modal.classList.remove("open"));
+  modal.addEventListener("click", e => {
+    if (e.target === modal) modal.classList.remove("open");
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") modal.classList.remove("open");
+  });
+  // Klick auf eine Option schließt Modal (Link öffnet sich im neuen Tab)
+  modal.querySelectorAll(".nav-modal__option").forEach(opt => {
+    opt.addEventListener("click", () => {
+      setTimeout(() => modal.classList.remove("open"), 200);
+    });
+  });
+}
+
+function setNavLinks(modal, { address, lat, lng, name }) {
+  const encA = encodeURIComponent(address);
+  const encN = encodeURIComponent(name);
+
+  const urls = {
+    google:     `https://www.google.com/maps/dir/?api=1&destination=${encA}`,
+    apple:      `https://maps.apple.com/?daddr=${encA}&dirflg=d`,
+    waze:       `https://www.waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+    citymapper: `https://citymapper.com/directions?endcoord=${lat},${lng}&endname=${encN}&endaddress=${encA}`
+  };
+
+  Object.entries(urls).forEach(([app, url]) => {
+    const link = modal.querySelector(`.nav-modal__option[data-app="${app}"]`);
+    if (link) link.href = url;
+  });
+}
