@@ -770,31 +770,106 @@ function isDarkMode() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+// Holt die öffentliche Telegram-Web-Vorschau über mehrere CORS-Proxies (Fallback-Kette)
+async function fetchTelegramHtml() {
+  const target = `https://t.me/s/${TELEGRAM_CHANNEL}`;
+  const proxies = [
+    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`
+  ];
+  for (const make of proxies) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(make(target), { signal: ctrl.signal });
+      clearTimeout(t);
+      if (!res.ok) continue;
+      const html = await res.text();
+      if (html && html.length > 500 && html.includes("tgme_widget_message")) return html;
+    } catch (e) { /* nächsten Proxy probieren */ }
+  }
+  return null;
+}
+
+function parseTelegramHtml(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const nodes = Array.from(doc.querySelectorAll(".tgme_widget_message_wrap, .tgme_widget_message"));
+  const posts = [];
+  const seen  = new Set();
+
+  for (const wrap of nodes) {
+    const msg = wrap.classList.contains("tgme_widget_message") ? wrap : wrap.querySelector(".tgme_widget_message");
+    if (!msg) continue;
+    if (msg.querySelector(".tgme_widget_message_service")) continue;
+    const dateA = msg.querySelector(".tgme_widget_message_date");
+    const link  = dateA?.getAttribute("href") || `https://t.me/${TELEGRAM_CHANNEL}`;
+    if (seen.has(link)) continue;
+    seen.add(link);
+
+    const textEl  = msg.querySelector(".tgme_widget_message_text");
+    const timeEl  = msg.querySelector("time[datetime]");
+    const photoEl = msg.querySelector(".tgme_widget_message_photo_wrap");
+    let photo = null;
+    if (photoEl) {
+      const style = photoEl.getAttribute("style") || "";
+      const m = style.match(/url\(['"]?([^'")]+)['"]?\)/);
+      if (m) photo = m[1];
+    }
+    const videoEl = msg.querySelector("video");
+    const video   = videoEl?.getAttribute("src") || null;
+
+    posts.push({
+      html:  textEl ? textEl.innerHTML : "",
+      iso:   timeEl?.getAttribute("datetime") || "",
+      link,
+      photo,
+      video
+    });
+  }
+  // Telegram liefert älteste zuerst – wir wollen neueste oben
+  return posts.reverse();
+}
+
+function postToCard(p) {
+  const d = p.iso ? new Date(p.iso) : null;
+  const date = d ? d.toLocaleDateString("de-DE", { day:"numeric", month:"long", year:"numeric" }) : "";
+  const time = d ? d.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "";
+  const media = p.photo
+    ? `<img class="news-card__media" src="${p.photo}" alt="" loading="lazy" />`
+    : (p.video ? `<video class="news-card__media" src="${p.video}" controls preload="metadata"></video>` : "");
+  return `
+    <article class="news-card news-card--custom">
+      <header class="news-card__head">
+        <div class="news-card__avatar" aria-hidden="true">📨</div>
+        <div class="news-card__meta">
+          <strong>DGS Stammtisch Hamburg &amp; Umgebung</strong>
+          <time class="news-card__date">${date}${time ? " · " + time : ""}</time>
+        </div>
+      </header>
+      ${media}
+      <div class="news-card__body">${p.html || "<em>(ohne Text)</em>"}</div>
+      <a class="news-card__link" href="${p.link}" target="_blank" rel="noopener noreferrer">In Telegram öffnen ↗</a>
+    </article>`;
+}
+
 async function renderTelegramFeed() {
   const grid = document.getElementById("newsGrid");
   if (!grid) return;
-
   grid.innerHTML = `<div class="news-loading">📰 Lade Posts aus dem Telegram-Kanal …</div>`;
 
-  // 1. Versuch: RSSHub – holt automatisch alle Posts des öffentlichen Kanals
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 9000);
-    const res = await fetch(`https://rsshub.app/telegram/channel/${TELEGRAM_CHANNEL}`, { signal: ctrl.signal });
-    clearTimeout(t);
-    if (!res.ok) throw new Error("rsshub status " + res.status);
-    const xml = await res.text();
-    const doc = new DOMParser().parseFromString(xml, "application/xml");
-    if (doc.querySelector("parsererror")) throw new Error("rsshub parse");
-    const items = Array.from(doc.querySelectorAll("item")).slice(0, 8);
-    if (!items.length) { renderNewsEmpty(grid); return; }
-    grid.innerHTML = items.map(itemToCard).join("");
-    return;
-  } catch (e) {
-    console.warn("Telegram-Feed via RSSHub fehlgeschlagen, nutze Embed-Fallback:", e);
+  // 1. Versuch: t.me/s/<kanal> via CORS-Proxy → ALLE Posts
+  const html = await fetchTelegramHtml();
+  if (html) {
+    const posts = parseTelegramHtml(html).slice(0, 10);
+    if (posts.length) {
+      grid.innerHTML = posts.map(postToCard).join("");
+      return;
+    }
   }
 
-  // 2. Fallback: manuelle Posts aus TELEGRAM_POSTS via Telegram-Widget
+  // 2. Fallback: Telegram-Embed-Widget für die manuell hinterlegten Post-IDs
+  console.warn("Telegram-Web-Vorschau nicht erreichbar – nutze Embed-Fallback");
   if (!TELEGRAM_POSTS.length) { renderNewsEmpty(grid); return; }
   const dark = isDarkMode();
   grid.innerHTML = "";
@@ -813,27 +888,6 @@ async function renderTelegramFeed() {
     card.appendChild(s);
     grid.appendChild(card);
   });
-}
-
-function itemToCard(item) {
-  const descRaw = item.querySelector("description")?.textContent || "";
-  const link    = item.querySelector("link")?.textContent || `https://t.me/${TELEGRAM_CHANNEL}`;
-  const pub     = item.querySelector("pubDate")?.textContent || "";
-  const date    = pub ? new Date(pub).toLocaleDateString("de-DE", { day:"numeric", month:"long", year:"numeric" }) : "";
-  const time    = pub ? new Date(pub).toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "";
-  // RSSHub liefert HTML in description; wir rendern es direkt (eigener Channel = vertrauenswürdig)
-  return `
-    <article class="news-card news-card--custom">
-      <header class="news-card__head">
-        <div class="news-card__avatar" aria-hidden="true">📨</div>
-        <div class="news-card__meta">
-          <strong>DGS Stammtisch Hamburg &amp; Umgebung</strong>
-          <time class="news-card__date">${date}${time ? ` · ${time}` : ""}</time>
-        </div>
-      </header>
-      <div class="news-card__body">${descRaw}</div>
-      <a class="news-card__link" href="${link}" target="_blank" rel="noopener noreferrer">In Telegram öffnen ↗</a>
-    </article>`;
 }
 
 function renderNewsEmpty(grid) {
