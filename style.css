@@ -667,6 +667,15 @@ a:hover { text-decoration: underline; }
   margin: .55rem 0;
   display: block;
 }
+.news-card__media {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: .65rem;
+  margin: 0 0 .85rem;
+  background: var(--bg-alt);
+}
 .news-card__body a {
   color: var(--primary);
   font-weight: 600;
