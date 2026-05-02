@@ -5,7 +5,7 @@
 // ── Firebase (RSVP-System) ─────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getDatabase, ref, set, onValue, serverTimestamp
+  getDatabase, ref, set, remove, onValue, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -134,6 +134,7 @@ const LOCATIONS = [
   {
     name: "Markt König (Rindermarkthalle)",
     lat: 53.5566, lng: 9.9618,
+    address: "Neuer Kamp 31, 20359 Hamburg",
     info: `<strong>Markt König (Rindermarkthalle)</strong><br>
            Neuer Kamp 31, 20359 Hamburg<br>
            1. Donnerstag im Monat<br>
@@ -143,6 +144,7 @@ const LOCATIONS = [
   {
     name: "Peacetanbul",
     lat: 53.5853, lng: 10.0269,
+    address: "Jarrestraße 20, 22303 Hamburg",
     info: `<strong>Peacetanbul</strong><br>
            Jarrestraße 20, 22303 Hamburg<br>
            2. Donnerstag im Monat<br>
@@ -152,6 +154,7 @@ const LOCATIONS = [
   {
     name: "Villa im Park",
     lat: 53.5742, lng: 9.9447,
+    address: "Else-Rauch-Platz 1, 20255 Hamburg",
     info: `<strong>Villa im Park</strong><br>
            Else-Rauch-Platz 1, 20255 Hamburg<br>
            3. Donnerstag im Monat<br>
@@ -161,6 +164,7 @@ const LOCATIONS = [
   {
     name: "Lim's – Buchholz",
     lat: 53.3236, lng: 9.8711,
+    address: "Breite Str. 10, 21244 Buchholz",
     info: `<strong>Lim's</strong><br>
            Breite Str. 10, 21244 Buchholz<br>
            3. Freitag im Monat<br>
@@ -170,6 +174,7 @@ const LOCATIONS = [
   {
     name: "Barmbeker Schachcafé",
     lat: 53.6004, lng: 10.0388,
+    address: "Rübenkamp 227, 22307 Hamburg",
     info: `<strong>Barmbeker Schachcafé</strong><br>
            Rübenkamp 227, 22307 Hamburg<br>
            4. Donnerstag im Monat<br>
@@ -220,27 +225,46 @@ function renderTermine() {
         <h3>${t.title}</h3>
         <p>${t.info}</p>
         <p>${t.ort}</p>
-        <span class="termin-card__tag">${t.tag}</span>
         <div class="rsvp">
           <div class="rsvp__buttons">
-            <button class="rsvp-btn rsvp-btn--yes"   data-status="yes"   data-termin="${tid}">✅ Komme</button>
-            <button class="rsvp-btn rsvp-btn--maybe" data-status="maybe" data-termin="${tid}">🤔 Vielleicht</button>
-            <button class="rsvp-btn rsvp-btn--no"    data-status="no"    data-termin="${tid}">❌ Kann nicht</button>
+            <button class="rsvp-btn rsvp-btn--yes"   data-status="yes"   data-termin="${tid}">
+              <span class="rsvp-btn__emoji">✅</span><span class="rsvp-btn__label">Komme</span>
+            </button>
+            <button class="rsvp-btn rsvp-btn--maybe" data-status="maybe" data-termin="${tid}">
+              <span class="rsvp-btn__emoji">🤔</span><span class="rsvp-btn__label">Vielleicht</span>
+            </button>
+            <button class="rsvp-btn rsvp-btn--no"    data-status="no"    data-termin="${tid}">
+              <span class="rsvp-btn__emoji">❌</span><span class="rsvp-btn__label">Kann nicht</span>
+            </button>
           </div>
           <div class="rsvp__counts">
-            <span class="rsvp-status rsvp-status--yes"   title="Noch keine Zusagen">✅ <span class="rsvp-count rsvp-count--yes">0</span></span>
-            <span class="rsvp-status rsvp-status--maybe" title="Niemand">🤔 <span class="rsvp-count rsvp-count--maybe">0</span></span>
-            <span class="rsvp-status rsvp-status--no"    title="Niemand">❌ <span class="rsvp-count rsvp-count--no">0</span></span>
+            <button type="button" class="rsvp-status rsvp-status--yes"   data-status-key="yes"   data-names="[]">✅ <span class="rsvp-count rsvp-count--yes">0</span></button>
+            <button type="button" class="rsvp-status rsvp-status--maybe" data-status-key="maybe" data-names="[]">🤔 <span class="rsvp-count rsvp-count--maybe">0</span></button>
+            <button type="button" class="rsvp-status rsvp-status--no"    data-status-key="no"    data-names="[]">❌ <span class="rsvp-count rsvp-count--no">0</span></button>
           </div>
+          <div class="rsvp__names" hidden></div>
+          <button type="button" class="rsvp__cal" data-termin="${tid}" hidden>📅 In Kalender eintragen</button>
         </div>
       </div>
     </article>`;
   }).join("");
 
   grid.addEventListener("click", e => {
-    const btn = e.target.closest(".rsvp-btn");
-    if (!btn) return;
-    handleRsvp(btn.dataset.termin, btn.dataset.status);
+    const rsvpBtn = e.target.closest(".rsvp-btn");
+    if (rsvpBtn) {
+      handleRsvp(rsvpBtn.dataset.termin, rsvpBtn.dataset.status);
+      return;
+    }
+    const statusBtn = e.target.closest(".rsvp-status");
+    if (statusBtn) {
+      toggleNamesDisplay(statusBtn);
+      return;
+    }
+    const calBtn = e.target.closest(".rsvp__cal");
+    if (calBtn) {
+      addToCalendar(calBtn.dataset.termin);
+      return;
+    }
   });
 }
 
@@ -258,17 +282,111 @@ async function handleRsvp(tid, status) {
     localStorage.setItem("dgs_name", name);
   }
   const docId = `${tid}_${slugify(name)}`;
+  const card = document.querySelector(`.termin-card[data-termin-id="${tid}"]`);
+  const isToggleOff = card?.querySelector(`.rsvp-btn.active[data-status="${status}"]`);
+
   try {
-    await set(ref(db, `rsvps/${docId}`), {
-      terminId: tid,
-      name,
-      status,
-      ts: serverTimestamp()
-    });
+    if (isToggleOff) {
+      await remove(ref(db, `rsvps/${docId}`));
+    } else {
+      await set(ref(db, `rsvps/${docId}`), {
+        terminId: tid, name, status, ts: serverTimestamp()
+      });
+    }
   } catch (e) {
     console.error("RSVP-Fehler:", e);
     alert("Anmeldung fehlgeschlagen. Bitte nochmal versuchen.");
   }
+}
+
+const STATUS_EMOJI = { yes: "✅", maybe: "🤔", no: "❌" };
+
+function toggleNamesDisplay(statusBtn) {
+  const card = statusBtn.closest(".termin-card");
+  const namesEl = card.querySelector(".rsvp__names");
+  const key = statusBtn.dataset.statusKey;
+  const names = JSON.parse(statusBtn.dataset.names || "[]");
+
+  if (namesEl.dataset.showing === key && !namesEl.hidden) {
+    namesEl.hidden = true;
+    namesEl.dataset.showing = "";
+    return;
+  }
+  if (names.length === 0) {
+    namesEl.innerHTML = `<em>Noch niemand</em>`;
+  } else {
+    namesEl.innerHTML = `<strong>${STATUS_EMOJI[key]}</strong> ${names.map(escapeHtml).join(", ")}`;
+  }
+  namesEl.hidden = false;
+  namesEl.dataset.showing = key;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+
+function addToCalendar(tid) {
+  const t = TERMINE.find(x => terminId(x) === tid);
+  if (!t) return;
+  const monthNum = MONTH_NUM[t.month] || "01";
+  const dateStr = `${t.year}${monthNum}${pad2(t.day)}`;
+  const dtStart = `${dateStr}T190000`;
+  const dtEnd   = `${dateStr}T220000`;
+
+  const now = new Date();
+  const dtStamp = `${now.getUTCFullYear()}${pad2(now.getUTCMonth()+1)}${pad2(now.getUTCDate())}T${pad2(now.getUTCHours())}${pad2(now.getUTCMinutes())}${pad2(now.getUTCSeconds())}Z`;
+
+  const loc = LOCATIONS.find(l => l.name === t.title);
+  const address = loc?.address || t.ort;
+
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//DGS Stammtisch HH//DE",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VTIMEZONE",
+    "TZID:Europe/Berlin",
+    "BEGIN:STANDARD",
+    "DTSTART:19701025T030000",
+    "TZOFFSETFROM:+0200",
+    "TZOFFSETTO:+0100",
+    "TZNAME:CET",
+    "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10",
+    "END:STANDARD",
+    "BEGIN:DAYLIGHT",
+    "DTSTART:19700329T020000",
+    "TZOFFSETFROM:+0100",
+    "TZOFFSETTO:+0200",
+    "TZNAME:CEST",
+    "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3",
+    "END:DAYLIGHT",
+    "END:VTIMEZONE",
+    "BEGIN:VEVENT",
+    `UID:${tid}@dgs-stammtisch-hamburg.de`,
+    `DTSTAMP:${dtStamp}`,
+    `DTSTART;TZID=Europe/Berlin:${dtStart}`,
+    `DTEND;TZID=Europe/Berlin:${dtEnd}`,
+    `SUMMARY:DGS Stammtisch – ${t.title}`,
+    `LOCATION:${address}`,
+    "DESCRIPTION:Stammtisch für Deutsche Gebärdensprache. Mehr Infos: https://dizzle23man.github.io/DGS-Stammtisch-HHU/",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `dgs-stammtisch-${dateStr}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
 }
 
 function askName() {
@@ -327,18 +445,33 @@ function updateCardCounts(card, rsvps) {
       names[r.status].push(r.name);
     }
   });
-  card.querySelector(".rsvp-count--yes").textContent   = counts.yes;
-  card.querySelector(".rsvp-count--maybe").textContent = counts.maybe;
-  card.querySelector(".rsvp-count--no").textContent    = counts.no;
-  card.querySelector(".rsvp-status--yes").title   = names.yes.join(", ")   || "Noch keine Zusagen";
-  card.querySelector(".rsvp-status--maybe").title = names.maybe.join(", ") || "Niemand";
-  card.querySelector(".rsvp-status--no").title    = names.no.join(", ")    || "Niemand";
+  ["yes","maybe","no"].forEach(key => {
+    card.querySelector(`.rsvp-count--${key}`).textContent = counts[key];
+    const btn = card.querySelector(`.rsvp-status--${key}`);
+    btn.dataset.names = JSON.stringify(names[key]);
+    btn.title = names[key].join(", ") || "Niemand";
+  });
 
   const myName = (localStorage.getItem("dgs_name") || "").toLowerCase();
   const mine   = rsvps.find(r => r.name.toLowerCase() === myName);
   card.querySelectorAll(".rsvp-btn").forEach(btn => {
-    btn.classList.toggle("active", mine && btn.dataset.status === mine.status);
+    btn.classList.toggle("active", !!(mine && btn.dataset.status === mine.status));
   });
+
+  const calBtn = card.querySelector(".rsvp__cal");
+  if (calBtn) calBtn.hidden = !(mine && mine.status === "yes");
+
+  // Live-Update der Namen-Anzeige falls offen
+  const namesEl = card.querySelector(".rsvp__names");
+  const showing = namesEl.dataset.showing;
+  if (showing && !namesEl.hidden) {
+    const list = names[showing] || [];
+    if (list.length === 0) {
+      namesEl.innerHTML = `<em>Noch niemand</em>`;
+    } else {
+      namesEl.innerHTML = `<strong>${STATUS_EMOJI[showing]}</strong> ${list.map(escapeHtml).join(", ")}`;
+    }
+  }
 }
 
 // ── Events rendern ──────────────────────────────────
