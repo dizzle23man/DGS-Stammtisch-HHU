@@ -2,6 +2,31 @@
    DGS Stammtisch Hamburg – app.js
    =================================================== */
 
+// ── Firebase (RSVP-System) ─────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getDatabase, ref, set, onValue, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyARSPCvSXn7KkJc9HSUCAAKDr7jVqi9QJY",
+  authDomain: "dgs-stammtisch-hhu.firebaseapp.com",
+  databaseURL: "https://dgs-stammtisch-hhu-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "dgs-stammtisch-hhu",
+  storageBucket: "dgs-stammtisch-hhu.firebasestorage.app",
+  messagingSenderId: "330628209563",
+  appId: "1:330628209563:web:3506adcdd29cdeef3a5f3e",
+  measurementId: "G-QB9QW6J2HY"
+};
+
+let db = null;
+try {
+  const fbApp = initializeApp(firebaseConfig);
+  db = getDatabase(fbApp);
+} catch (e) {
+  console.warn("Firebase nicht initialisiert:", e);
+}
+
 // ── Daten ──────────────────────────────────────────
 
 const TERMINE = [
@@ -167,25 +192,153 @@ const GALLERY_ITEMS = [
 
 // ── Termine rendern ─────────────────────────────────
 
+const MONTH_NUM = { Jan:"01", Feb:"02", "Mär":"03", Apr:"04", Mai:"05", Jun:"06", Jul:"07", Aug:"08", Sep:"09", Okt:"10", Nov:"11", Dez:"12" };
+
+function slugify(s) {
+  return s.toLowerCase()
+    .replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function terminId(t) {
+  return `${t.year}-${MONTH_NUM[t.month] || "00"}-${t.day}_${slugify(t.title)}`;
+}
+
 function renderTermine() {
   const grid = document.getElementById("termineGrid");
   grid.innerHTML = TERMINE.map(t => {
+    const tid = terminId(t);
     const dateBadge = t.day
       ? `<div class="termin-card__day">${t.day}</div>
          <div class="termin-card__month">${t.month}</div>`
       : `<div class="termin-card__day" style="font-size:.9rem">?</div>
          <div class="termin-card__month">${t.month}</div>`;
     return `
-    <article class="termin-card">
+    <article class="termin-card" data-termin-id="${tid}">
       <div class="termin-card__date">${dateBadge}</div>
       <div class="termin-card__info">
         <h3>${t.title}</h3>
         <p>${t.info}</p>
         <p>${t.ort}</p>
         <span class="termin-card__tag">${t.tag}</span>
+        <div class="rsvp">
+          <div class="rsvp__buttons">
+            <button class="rsvp-btn rsvp-btn--yes"   data-status="yes"   data-termin="${tid}">✅ Komme</button>
+            <button class="rsvp-btn rsvp-btn--maybe" data-status="maybe" data-termin="${tid}">🤔 Vielleicht</button>
+            <button class="rsvp-btn rsvp-btn--no"    data-status="no"    data-termin="${tid}">❌ Kann nicht</button>
+          </div>
+          <div class="rsvp__counts">
+            <span class="rsvp-status rsvp-status--yes"   title="Noch keine Zusagen">✅ <span class="rsvp-count rsvp-count--yes">0</span></span>
+            <span class="rsvp-status rsvp-status--maybe" title="Niemand">🤔 <span class="rsvp-count rsvp-count--maybe">0</span></span>
+            <span class="rsvp-status rsvp-status--no"    title="Niemand">❌ <span class="rsvp-count rsvp-count--no">0</span></span>
+          </div>
+        </div>
       </div>
     </article>`;
   }).join("");
+
+  grid.addEventListener("click", e => {
+    const btn = e.target.closest(".rsvp-btn");
+    if (!btn) return;
+    handleRsvp(btn.dataset.termin, btn.dataset.status);
+  });
+}
+
+// ── RSVP-Logik ──────────────────────────────────────
+
+async function handleRsvp(tid, status) {
+  if (!db) {
+    alert("Anmeldung gerade nicht möglich. Bitte später nochmal versuchen.");
+    return;
+  }
+  let name = localStorage.getItem("dgs_name");
+  if (!name) {
+    name = await askName();
+    if (!name) return;
+    localStorage.setItem("dgs_name", name);
+  }
+  const docId = `${tid}_${slugify(name)}`;
+  try {
+    await set(ref(db, `rsvps/${docId}`), {
+      terminId: tid,
+      name,
+      status,
+      ts: serverTimestamp()
+    });
+  } catch (e) {
+    console.error("RSVP-Fehler:", e);
+    alert("Anmeldung fehlgeschlagen. Bitte nochmal versuchen.");
+  }
+}
+
+function askName() {
+  return new Promise(resolve => {
+    const modal  = document.getElementById("nameModal");
+    const input  = document.getElementById("nameInput");
+    const okBtn  = document.getElementById("nameOk");
+    const cancel = document.getElementById("nameCancel");
+
+    input.value = "";
+    modal.classList.add("open");
+    setTimeout(() => input.focus(), 50);
+
+    const cleanup = (val) => {
+      modal.classList.remove("open");
+      okBtn.removeEventListener("click", onOk);
+      cancel.removeEventListener("click", onCancel);
+      input.removeEventListener("keydown", onKey);
+      resolve(val);
+    };
+    const onOk = () => {
+      const v = input.value.trim();
+      if (v.length < 2) { input.focus(); return; }
+      cleanup(v);
+    };
+    const onCancel = () => cleanup(null);
+    const onKey = (e) => { if (e.key === "Enter") onOk(); if (e.key === "Escape") onCancel(); };
+
+    okBtn.addEventListener("click", onOk);
+    cancel.addEventListener("click", onCancel);
+    input.addEventListener("keydown", onKey);
+  });
+}
+
+function initRsvpSubscription() {
+  if (!db) return;
+  onValue(ref(db, "rsvps"), snapshot => {
+    const all = snapshot.val() || {};
+    const byTermin = {};
+    Object.values(all).forEach(r => {
+      if (!r || !r.terminId) return;
+      (byTermin[r.terminId] ||= []).push(r);
+    });
+    document.querySelectorAll(".termin-card[data-termin-id]").forEach(card => {
+      updateCardCounts(card, byTermin[card.dataset.terminId] || []);
+    });
+  });
+}
+
+function updateCardCounts(card, rsvps) {
+  const counts = { yes:0, maybe:0, no:0 };
+  const names  = { yes:[], maybe:[], no:[] };
+  rsvps.forEach(r => {
+    if (counts[r.status] !== undefined) {
+      counts[r.status]++;
+      names[r.status].push(r.name);
+    }
+  });
+  card.querySelector(".rsvp-count--yes").textContent   = counts.yes;
+  card.querySelector(".rsvp-count--maybe").textContent = counts.maybe;
+  card.querySelector(".rsvp-count--no").textContent    = counts.no;
+  card.querySelector(".rsvp-status--yes").title   = names.yes.join(", ")   || "Noch keine Zusagen";
+  card.querySelector(".rsvp-status--maybe").title = names.maybe.join(", ") || "Niemand";
+  card.querySelector(".rsvp-status--no").title    = names.no.join(", ")    || "Niemand";
+
+  const myName = (localStorage.getItem("dgs_name") || "").toLowerCase();
+  const mine   = rsvps.find(r => r.name.toLowerCase() === myName);
+  card.querySelectorAll(".rsvp-btn").forEach(btn => {
+    btn.classList.toggle("active", mine && btn.dataset.status === mine.status);
+  });
 }
 
 // ── Events rendern ──────────────────────────────────
@@ -474,4 +627,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initNav();
   initForm();
   initPWA();
+  initRsvpSubscription();
 });
