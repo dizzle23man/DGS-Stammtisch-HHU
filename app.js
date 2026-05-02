@@ -414,7 +414,7 @@ function showEdgeInstructions(banner, installBtn) {
 
 function initPWA() {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js")
+    navigator.serviceWorker.register("sw.js")
       .catch(err => console.warn("SW-Fehler:", err));
   }
 
