@@ -15,8 +15,6 @@
   <meta name="apple-mobile-web-app-title" content="DGS HH" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -47,7 +45,6 @@
         <li><a href="#termine">Termine</a></li>
         <li><a href="#events">Events</a></li>
         <li><a href="#galerie">Galerie</a></li>
-        <li><a href="#karte">Karte</a></li>
         <li><a href="#kontakt">Kontakt</a></li>
       </ul>
     </nav>
@@ -61,7 +58,7 @@
       <p class="hero__sub">Trefft euch, tauscht euch aus und lernt gemeinsam – offen für Gehörlose, Schwerhörige, Hörende und alle, die Deutsche Gebärdensprache lieben.</p>
       <div class="hero__cta">
         <a href="#termine" class="btn btn--primary">Nächste Termine</a>
-        <a href="#karte" class="btn btn--outline">Karte ansehen</a>
+        <a href="#treffpunkte" class="btn btn--outline">Treffpunkte ansehen</a>
       </div>
     </div>
     <div class="hero__wave">
@@ -222,16 +219,6 @@
           📸 @dgs_stammtisch_hhu auf Instagram folgen
         </a>
       </p>
-    </div>
-  </section>
-
-  <!-- ===== KARTE ===== -->
-  <section class="section section--alt" id="karte">
-    <div class="container">
-      <h2 class="section__title">Stammtische auf der <span class="accent">Karte</span></h2>
-      <p class="section__sub">Klick auf einen Marker für Ort, Zeit und Infos.</p>
-      <div id="map" role="application" aria-label="Interaktive Karte der Stammtische in Hamburg und Umgebung"></div>
-      <p class="map__hint">Kennt ihr einen weiteren Stammtisch? <a href="#kontakt">Meldet euch!</a></p>
     </div>
   </section>
 
@@ -403,15 +390,12 @@
         <a href="#termine">Termine</a>
         <a href="#events">Events</a>
         <a href="#galerie">Galerie</a>
-        <a href="#karte">Karte</a>
         <a href="#kontakt">Kontakt</a>
       </nav>
       <p class="footer__copy">© 2026 · Mit 👋 gemacht vom Admin-Team</p>
     </div>
   </footer>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Behold Instagram-Widget Loader -->
   <script>
     (() => {
