@@ -2,9 +2,9 @@
   "name": "DGS Stammtisch Hamburg",
   "short_name": "DGS HH",
   "description": "Stammtisch für Deutsche Gebärdensprache in Hamburg und Umgebung",
-  "id": "/",
-  "start_url": "/index.html",
-  "scope": "/",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#1e3a8a",
@@ -22,26 +22,26 @@
     {
       "name": "Nächste Termine",
       "short_name": "Termine",
-      "url": "/index.html#termine",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "./index.html#termine",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Treffpunkte & Karte",
       "short_name": "Karte",
-      "url": "/index.html#treffpunkte",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "./index.html#treffpunkte",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Events",
       "short_name": "Events",
-      "url": "/index.html#events",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "./index.html#events",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Kontakt",
       "short_name": "Kontakt",
-      "url": "/index.html#kontakt",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "./index.html#kontakt",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
