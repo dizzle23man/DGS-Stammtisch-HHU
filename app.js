@@ -770,24 +770,28 @@ function isDarkMode() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-// Holt die öffentliche Telegram-Web-Vorschau über mehrere CORS-Proxies (Fallback-Kette)
+// Holt die öffentliche Telegram-Web-Vorschau – primär über unseren eigenen
+// Cloudflare-Worker, dann öffentliche CORS-Proxies als Fallback.
+const TELEGRAM_WORKER_URL = "https://white-field-7706.richard-pal22.workers.dev";
+
 async function fetchTelegramHtml() {
   const target = `https://t.me/s/${TELEGRAM_CHANNEL}`;
-  const proxies = [
-    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`
+  const sources = [
+    () => `${TELEGRAM_WORKER_URL}/?channel=${TELEGRAM_CHANNEL}`,
+    () => `https://corsproxy.io/?url=${encodeURIComponent(target)}`,
+    () => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
+    () => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(target)}`
   ];
-  for (const make of proxies) {
+  for (const make of sources) {
     try {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 8000);
-      const res = await fetch(make(target), { signal: ctrl.signal });
+      const res = await fetch(make(), { signal: ctrl.signal });
       clearTimeout(t);
       if (!res.ok) continue;
       const html = await res.text();
       if (html && html.length > 500 && html.includes("tgme_widget_message")) return html;
-    } catch (e) { /* nächsten Proxy probieren */ }
+    } catch (e) { /* nächste Quelle probieren */ }
   }
   return null;
 }
