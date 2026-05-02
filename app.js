@@ -566,6 +566,8 @@ function closeLightbox() {
 // ── Leaflet Karte ───────────────────────────────────
 
 function initMap() {
+  const mapEl = document.getElementById("map");
+  if (!mapEl || typeof L === "undefined") return; // Karten-Sektion entfernt
   const map = L.map("map", { scrollWheelZoom: false }).setView([53.55, 10.00], 11);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -796,22 +798,43 @@ async function fetchTelegramHtml() {
   return null;
 }
 
+// Service-Message-Filter: "Channel created", "pinned «...»", etc.
+function isServiceText(text) {
+  if (!text) return false;
+  const t = text.trim();
+  if (/^channel\s+(was\s+)?created$/i.test(t)) return true;
+  if (/pinned\s+[«"„]/.test(t))                return true;
+  if (/^pinned\s+a\s+message$/i.test(t))       return true;
+  if (/^.*\spinned\s+«[^»]+»\s*$/.test(t))     return true; // "X pinned «Y»"
+  if (/^.*\spinned\s+«/.test(t))               return true;
+  return false;
+}
+
 function parseTelegramHtml(html) {
   const doc = new DOMParser().parseFromString(html, "text/html");
-  const nodes = Array.from(doc.querySelectorAll(".tgme_widget_message_wrap, .tgme_widget_message"));
+  const wraps = Array.from(doc.querySelectorAll(".tgme_widget_message_wrap"));
   const posts = [];
   const seen  = new Set();
 
-  for (const wrap of nodes) {
-    const msg = wrap.classList.contains("tgme_widget_message") ? wrap : wrap.querySelector(".tgme_widget_message");
+  for (const wrap of wraps) {
+    // Service-Wrapper überspringen (Channel created, pin actions, …)
+    if (wrap.querySelector(".tgme_widget_message_service")) continue;
+    if (wrap.querySelector(".tgme_widget_message_action"))  continue;
+
+    const msg = wrap.querySelector(".tgme_widget_message");
     if (!msg) continue;
-    if (msg.querySelector(".tgme_widget_message_service")) continue;
+    if (msg.classList.contains("service_message"))      continue;
+    if (msg.classList.contains("tgme_widget_message_service")) continue;
+
     const dateA = msg.querySelector(".tgme_widget_message_date");
     const link  = dateA?.getAttribute("href") || `https://t.me/${TELEGRAM_CHANNEL}`;
     if (seen.has(link)) continue;
     seen.add(link);
 
     const textEl  = msg.querySelector(".tgme_widget_message_text");
+    const text    = textEl ? textEl.textContent : "";
+    if (isServiceText(text)) continue; // Notfall-Filter über Inhalt
+
     const timeEl  = msg.querySelector("time[datetime]");
     const photoEl = msg.querySelector(".tgme_widget_message_photo_wrap");
     let photo = null;
@@ -822,6 +845,9 @@ function parseTelegramHtml(html) {
     }
     const videoEl = msg.querySelector("video");
     const video   = videoEl?.getAttribute("src") || null;
+
+    // Posts ohne jeden Inhalt komplett überspringen
+    if (!textEl?.innerHTML?.trim() && !photo && !video) continue;
 
     posts.push({
       html:  textEl ? textEl.innerHTML : "",
@@ -865,7 +891,7 @@ async function renderTelegramFeed() {
   // 1. Versuch: t.me/s/<kanal> via CORS-Proxy → ALLE Posts
   const html = await fetchTelegramHtml();
   if (html) {
-    const posts = parseTelegramHtml(html).slice(0, 10);
+    const posts = parseTelegramHtml(html).slice(0, 6);
     if (posts.length) {
       grid.innerHTML = posts.map(postToCard).join("");
       return;
