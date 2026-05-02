@@ -770,22 +770,37 @@ function isDarkMode() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-function renderTelegramFeed() {
+async function renderTelegramFeed() {
   const grid = document.getElementById("newsGrid");
   if (!grid) return;
 
-  if (!TELEGRAM_POSTS.length) {
-    grid.innerHTML = `<p class="news-empty">Noch keine Posts. <a href="https://t.me/${TELEGRAM_CHANNEL}" target="_blank" rel="noopener">Folge unserem Telegram-Kanal</a> für die ersten News.</p>`;
+  grid.innerHTML = `<div class="news-loading">📰 Lade Posts aus dem Telegram-Kanal …</div>`;
+
+  // 1. Versuch: RSSHub – holt automatisch alle Posts des öffentlichen Kanals
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 9000);
+    const res = await fetch(`https://rsshub.app/telegram/channel/${TELEGRAM_CHANNEL}`, { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!res.ok) throw new Error("rsshub status " + res.status);
+    const xml = await res.text();
+    const doc = new DOMParser().parseFromString(xml, "application/xml");
+    if (doc.querySelector("parsererror")) throw new Error("rsshub parse");
+    const items = Array.from(doc.querySelectorAll("item")).slice(0, 8);
+    if (!items.length) { renderNewsEmpty(grid); return; }
+    grid.innerHTML = items.map(itemToCard).join("");
     return;
+  } catch (e) {
+    console.warn("Telegram-Feed via RSSHub fehlgeschlagen, nutze Embed-Fallback:", e);
   }
 
+  // 2. Fallback: manuelle Posts aus TELEGRAM_POSTS via Telegram-Widget
+  if (!TELEGRAM_POSTS.length) { renderNewsEmpty(grid); return; }
   const dark = isDarkMode();
   grid.innerHTML = "";
-
   TELEGRAM_POSTS.forEach(post => {
     const card = document.createElement("div");
     card.className = "news-card";
-
     const s = document.createElement("script");
     s.async = true;
     s.src = "https://telegram.org/js/telegram-widget.js?22";
@@ -795,10 +810,34 @@ function renderTelegramFeed() {
     s.dataset.color = "1e3a8a";
     s.dataset.darkColor = "60a5fa";
     if (dark) s.dataset.dark = "1";
-
     card.appendChild(s);
     grid.appendChild(card);
   });
+}
+
+function itemToCard(item) {
+  const descRaw = item.querySelector("description")?.textContent || "";
+  const link    = item.querySelector("link")?.textContent || `https://t.me/${TELEGRAM_CHANNEL}`;
+  const pub     = item.querySelector("pubDate")?.textContent || "";
+  const date    = pub ? new Date(pub).toLocaleDateString("de-DE", { day:"numeric", month:"long", year:"numeric" }) : "";
+  const time    = pub ? new Date(pub).toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" }) : "";
+  // RSSHub liefert HTML in description; wir rendern es direkt (eigener Channel = vertrauenswürdig)
+  return `
+    <article class="news-card news-card--custom">
+      <header class="news-card__head">
+        <div class="news-card__avatar" aria-hidden="true">📨</div>
+        <div class="news-card__meta">
+          <strong>DGS Stammtisch Hamburg &amp; Umgebung</strong>
+          <time class="news-card__date">${date}${time ? ` · ${time}` : ""}</time>
+        </div>
+      </header>
+      <div class="news-card__body">${descRaw}</div>
+      <a class="news-card__link" href="${link}" target="_blank" rel="noopener noreferrer">In Telegram öffnen ↗</a>
+    </article>`;
+}
+
+function renderNewsEmpty(grid) {
+  grid.innerHTML = `<p class="news-empty">Noch keine Posts. <a href="https://t.me/${TELEGRAM_CHANNEL}" target="_blank" rel="noopener">Folge unserem Telegram-Kanal</a> für die ersten News.</p>`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
