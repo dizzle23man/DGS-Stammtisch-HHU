@@ -35,9 +35,9 @@ const TERMINE = [
   },
   {
     day: "28", month: "Mai", year: 2026,
-    title: "Schachcafé",
+    title: "Barmbeker Schachcafé",
     info: "4. Donnerstag im Monat",
-    ort: "Schachcafé, Hamburg",
+    ort: "Barmbeker Schachcafé, Hamburg",
     tag: "Monatlich"
   },
   {
@@ -70,9 +70,9 @@ const TERMINE = [
   },
   {
     day: "25", month: "Jun", year: 2026,
-    title: "Schachcafé",
+    title: "Barmbeker Schachcafé",
     info: "4. Donnerstag im Monat",
-    ort: "Schachcafé, Hamburg",
+    ort: "Barmbeker Schachcafé, Hamburg",
     tag: "Monatlich"
   }
 ];
@@ -108,28 +108,48 @@ const EVENTS = [
 const LOCATIONS = [
   {
     name: "Markt König (Rindermarkthalle)",
-    lat: 53.5567, lng: 9.9617,
-    info: "Rindermarkthalle, Hamburg<br>1. Donnerstag im Monat"
+    lat: 53.5566, lng: 9.9618,
+    info: `<strong>Markt König (Rindermarkthalle)</strong><br>
+           Neuer Kamp 31, 20359 Hamburg<br>
+           1. Donnerstag im Monat<br>
+           📞 <a href="tel:04043096135">040 43096135</a><br>
+           🌐 <a href="https://markt-koenig.de" target="_blank">markt-koenig.de</a>`
   },
   {
     name: "Peacetanbul",
-    lat: 53.5603, lng: 9.9347,
-    info: "Peacetanbul, Hamburg<br>2. Donnerstag im Monat"
+    lat: 53.5853, lng: 10.0269,
+    info: `<strong>Peacetanbul</strong><br>
+           Jarrestraße 20, 22303 Hamburg<br>
+           2. Donnerstag im Monat<br>
+           📞 <a href="tel:04069644975">040 69644975</a><br>
+           🌐 <a href="https://peacetanbul.de" target="_blank">peacetanbul.de</a>`
   },
   {
     name: "Villa im Park",
-    lat: 53.5752, lng: 9.9928,
-    info: "Villa im Park, Hamburg<br>3. Donnerstag im Monat"
+    lat: 53.5742, lng: 9.9447,
+    info: `<strong>Villa im Park</strong><br>
+           Else-Rauch-Platz 1, 20255 Hamburg<br>
+           3. Donnerstag im Monat<br>
+           📞 <a href="tel:04043208844">040 43208844</a><br>
+           🌐 <a href="https://villa-im-park.de" target="_blank">villa-im-park.de</a>`
   },
   {
     name: "Lim's – Buchholz",
-    lat: 53.3260, lng: 9.8680,
-    info: "Lim's, Buchholz in der Nordheide<br>3. Freitag im Monat"
+    lat: 53.3236, lng: 9.8711,
+    info: `<strong>Lim's</strong><br>
+           Breite Str. 10, 21244 Buchholz<br>
+           3. Freitag im Monat<br>
+           📞 <a href="tel:04181292011">04181 292011</a><br>
+           🌐 <a href="https://lims-restaurant.de" target="_blank">lims-restaurant.de</a>`
   },
   {
-    name: "Schachcafé",
-    lat: 53.5638, lng: 10.0023,
-    info: "Schachcafé, Hamburg<br>4. Donnerstag im Monat"
+    name: "Barmbeker Schachcafé",
+    lat: 53.6004, lng: 10.0388,
+    info: `<strong>Barmbeker Schachcafé</strong><br>
+           Rübenkamp 227, 22307 Hamburg<br>
+           4. Donnerstag im Monat<br>
+           📞 <a href="tel:04067106144">040 67106144</a><br>
+           🌐 <a href="https://barmbeker-schachcafe.de" target="_blank">barmbeker-schachcafe.de</a>`
   }
 ];
 
@@ -277,9 +297,7 @@ function initMap() {
   LOCATIONS.forEach(loc => {
     L.marker([loc.lat, loc.lng], { icon, title: loc.name })
       .addTo(map)
-      .bindPopup(`<strong>${loc.name}</strong><br>${loc.info}`, {
-        maxWidth: 220
-      });
+      .bindPopup(loc.info, { maxWidth: 240 });
   });
 }
 

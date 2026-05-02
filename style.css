@@ -456,6 +456,11 @@ a:hover { text-decoration: underline; }
   letter-spacing: .06em;
   margin-bottom: .2rem;
 }
+.gmaps__address {
+  font-size: .82rem;
+  color: var(--text-muted);
+  margin-top: .15rem;
+}
 .gmaps__frame-wrap {
   position: relative;
   width: 100%;
