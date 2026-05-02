@@ -229,14 +229,9 @@
       <h2 class="section__title">📸 <span class="accent">Galerie</span></h2>
       <p class="section__sub">Eindrücke aus unseren Treffen – live aus unserem Instagram-Account.</p>
 
-      <!-- LightWidget Instagram-Feed -->
+      <!-- Behold Instagram-Feed -->
       <div class="insta-feed">
-        <iframe src="https://lightwidget.com/widgets/4812d5ae1600594d80f9ab664223b760.html"
-                scrolling="no"
-                allowtransparency="true"
-                class="lightwidget-widget"
-                style="width:100%;border:0;overflow:hidden;"
-                title="Instagram-Feed DGS Stammtisch"></iframe>
+        <behold-widget feed-id="PxJ1KEgwPTyYv1iGj1pX"></behold-widget>
       </div>
 
       <p class="gallery__hint">
@@ -434,8 +429,15 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- LightWidget Auto-Resize -->
-  <script src="https://cdn.lightwidget.com/widgets/lightwidget.js" defer></script>
+  <!-- Behold Instagram-Widget Loader -->
+  <script>
+    (() => {
+      const d = document, s = d.createElement("script");
+      s.type = "module";
+      s.src = "https://w.behold.so/widget.js";
+      d.head.append(s);
+    })();
+  </script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
