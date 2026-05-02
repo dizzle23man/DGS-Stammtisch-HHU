@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DGS Stammtisch Hamburg</title>
+  <meta name="description" content="Stammtisch für Deutsche Gebärdensprache in Hamburg und Umgebung – Termine, Events, Galerie und Treffpunkte auf der Karte." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" id="themeColorMeta" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DGS HH" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVIGATION ===== -->
+  <header class="header" id="top">
+    <nav class="nav container">
+      <a href="#top" class="nav__logo">
+        <span class="logo-icon">👋</span>
+        <span>DGS&nbsp;Stammtisch&nbsp;HH</span>
+      </a>
+      <div class="nav__actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Darkmode umschalten" title="Darkmode umschalten">
+          <span class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true">☀️</span>
+          <span class="theme-toggle__icon theme-toggle__icon--dark"  aria-hidden="true">🌙</span>
+        </button>
+        <button class="nav__burger" id="burger" aria-label="Menü öffnen" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="#treffpunkte">Treffpunkte</a></li>
+        <li><a href="#termine">Termine</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#galerie">Galerie</a></li>
+        <li><a href="#karte">Karte</a></li>
+        <li><a href="#kontakt">Kontakt</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero__content container">
+      <p class="hero__tag">Hamburg &amp; Umgebung</p>
+      <h1 class="hero__title">Stammtisch für<br><span class="accent">Deutsche Gebärdensprache</span></h1>
+      <p class="hero__sub">Trefft euch, tauscht euch aus und lernt gemeinsam – offen für Gehörlose, Schwerhörige, Hörende und alle, die DGS lieben.</p>
+      <div class="hero__cta">
+        <a href="#termine" class="btn btn--primary">Nächste Termine</a>
+        <a href="#karte" class="btn btn--outline">Karte ansehen</a>
+      </div>
+    </div>
+    <div class="hero__wave">
+      <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg)"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ===== GOOGLE MAPS ÜBERSICHT ===== -->
+  <section class="section" id="treffpunkte">
+    <div class="container">
+      <h2 class="section__title">Unsere <span class="accent">Treffpunkte</span></h2>
+      <p class="section__sub">Fünf Stammtische – einfach vorbeikommen, keine Anmeldung nötig!</p>
+      <div class="gmaps__grid">
+
+        <div class="gmaps__card">
+          <div class="gmaps__header">
+            <span class="gmaps__icon">🥩</span>
+            <div>
+              <p class="gmaps__when">1. Donnerstag im Monat</p>
+              <h3>Markt König (Rindermarkthalle)</h3>
+            </div>
+          </div>
+          <div class="gmaps__frame-wrap">
+            <iframe
+              src="https://maps.google.com/maps?q=Rindermarkthalle+Hamburg&output=embed&z=16"
+              title="Karte Rindermarkthalle Hamburg"
+              allowfullscreen loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+          <a class="gmaps__link"
+             href="https://maps.google.com/maps?q=Rindermarkthalle+Hamburg"
+             target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a>
+        </div>
+
+        <div class="gmaps__card">
+          <div class="gmaps__header">
+            <span class="gmaps__icon">🌿</span>
+            <div>
+              <p class="gmaps__when">2. Donnerstag im Monat</p>
+              <h3>Peacetanbul</h3>
+            </div>
+          </div>
+          <div class="gmaps__frame-wrap">
+            <iframe
+              src="https://maps.google.com/maps?q=Peacetanbul+Hamburg&output=embed&z=16"
+              title="Karte Peacetanbul Hamburg"
+              allowfullscreen loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+          <a class="gmaps__link"
+             href="https://maps.google.com/maps?q=Peacetanbul+Hamburg"
+             target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a>
+        </div>
+
+        <div class="gmaps__card">
+          <div class="gmaps__header">
+            <span class="gmaps__icon">🌳</span>
+            <div>
+              <p class="gmaps__when">3. Donnerstag im Monat</p>
+              <h3>Villa im Park</h3>
+            </div>
+          </div>
+          <div class="gmaps__frame-wrap">
+            <iframe
+              src="https://maps.google.com/maps?q=Villa+im+Park+Hamburg&output=embed&z=16"
+              title="Karte Villa im Park Hamburg"
+              allowfullscreen loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+          <a class="gmaps__link"
+             href="https://maps.google.com/maps?q=Villa+im+Park+Hamburg"
+             target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a>
+        </div>
+
+        <div class="gmaps__card">
+          <div class="gmaps__header">
+            <span class="gmaps__icon">🍜</span>
+            <div>
+              <p class="gmaps__when">3. Freitag im Monat</p>
+              <h3>Lim's – Buchholz</h3>
+            </div>
+          </div>
+          <div class="gmaps__frame-wrap">
+            <iframe
+              src="https://maps.google.com/maps?q=Lim%27s+Buchholz+Nordheide&output=embed&z=16"
+              title="Karte Lim's Buchholz"
+              allowfullscreen loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+          <a class="gmaps__link"
+             href="https://maps.google.com/maps?q=Lim%27s+Buchholz+Nordheide"
+             target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a>
+        </div>
+
+        <div class="gmaps__card">
+          <div class="gmaps__header">
+            <span class="gmaps__icon">♟️</span>
+            <div>
+              <p class="gmaps__when">4. Donnerstag im Monat</p>
+              <h3>Schachcafé</h3>
+            </div>
+          </div>
+          <div class="gmaps__frame-wrap">
+            <iframe
+              src="https://maps.google.com/maps?q=Schachcafe+Hamburg&output=embed&z=16"
+              title="Karte Schachcafé Hamburg"
+              allowfullscreen loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+          <a class="gmaps__link"
+             href="https://maps.google.com/maps?q=Schachcafe+Hamburg"
+             target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TERMINE ===== -->
+  <section class="section section--alt" id="termine">
+    <div class="container">
+      <h2 class="section__title">Nächste <span class="accent">Termine</span></h2>
+      <p class="section__sub">Alle Stammtische sind kostenlos und ohne Anmeldung – einfach vorbeikommen!</p>
+      <div class="termine__grid" id="termineGrid">
+        <!-- dynamisch per JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EVENTS ===== -->
+  <section class="section section--alt" id="events">
+    <div class="container">
+      <h2 class="section__title">Besondere <span class="accent">Events</span></h2>
+      <p class="section__sub">Workshops, Filmabende, Ausflüge und mehr.</p>
+      <div class="events__grid" id="eventsGrid">
+        <!-- dynamisch per JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GALERIE ===== -->
+  <section class="section" id="galerie">
+    <div class="container">
+      <h2 class="section__title"><span class="accent">Galerie</span></h2>
+      <p class="section__sub">Eindrücke aus unseren Treffen.</p>
+      <div class="gallery__grid" id="galleryGrid">
+        <!-- Platzhalter-Kacheln -->
+      </div>
+      <p class="gallery__hint">Fotos werden nach und nach ergänzt. Habt ihr Bilder? <a href="#kontakt">Schreibt uns!</a></p>
+    </div>
+  </section>
+
+  <!-- ===== KARTE ===== -->
+  <section class="section section--alt" id="karte">
+    <div class="container">
+      <h2 class="section__title">Stammtische auf der <span class="accent">Karte</span></h2>
+      <p class="section__sub">Klick auf einen Marker für Ort, Zeit und Infos.</p>
+      <div id="map" role="application" aria-label="Interaktive Karte der Stammtische in Hamburg und Umgebung"></div>
+      <p class="map__hint">Kennt ihr einen weiteren Stammtisch? <a href="#kontakt">Meldet euch!</a></p>
+    </div>
+  </section>
+
+  <!-- ===== KONTAKT ===== -->
+  <section class="section" id="kontakt">
+    <div class="container kontakt__wrap">
+      <div class="kontakt__text">
+        <h2 class="section__title">Kontakt &amp; <span class="accent">Mitmachen</span></h2>
+        <p>Ihr wollt einen neuen Stammtisch eintragen, Fotos einsenden oder einfach Hallo sagen? Schreibt uns eine Nachricht.</p>
+        <ul class="kontakt__list">
+          <li>📧 <a href="mailto:info@dgs-stammtisch-hamburg.de">info@dgs-stammtisch-hamburg.de</a></li>
+          <li>📸 Instagram: <a href="#" aria-label="Instagram (Platzhalter)">@dgs_stammtisch_hh</a></li>
+        </ul>
+      </div>
+      <form class="kontakt__form" id="kontaktForm" novalidate>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Dein Name" required />
+
+        <label for="email">E-Mail</label>
+        <input type="email" id="email" name="email" placeholder="deine@email.de" required />
+
+        <label for="nachricht">Nachricht</label>
+        <textarea id="nachricht" name="nachricht" rows="4" placeholder="Deine Nachricht…" required></textarea>
+
+        <button type="submit" class="btn btn--primary">Abschicken</button>
+        <p class="form__feedback" id="formFeedback" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== INSTALL MODAL EDGE ===== -->
+  <div class="install-modal" id="edgeModal" role="dialog" aria-modal="true" aria-label="App in Edge installieren">
+    <div class="install-modal__box">
+      <button class="install-modal__close" onclick="document.getElementById('edgeModal').classList.remove('open')" aria-label="Schließen">✕</button>
+      <h3>App in Edge installieren</h3>
+      <ol class="install-modal__steps">
+        <li>Tippe auf das <strong>Menü-Symbol (…)</strong> oben rechts in Edge</li>
+        <li>Wähle <strong>„Apps"</strong></li>
+        <li>Tippe auf <strong>„Diese Website als App installieren"</strong></li>
+        <li>Namen bestätigen → <strong>„Hinzufügen"</strong> tippen</li>
+        <li>Das App-Icon erscheint auf deinem Homescreen ✅</li>
+      </ol>
+      <button class="btn btn--primary" onclick="document.getElementById('edgeModal').classList.remove('open')">Verstanden</button>
+    </div>
+  </div>
+
+  <!-- ===== INSTALL MODAL IOS ===== -->
+  <div class="install-modal" id="iosModal" role="dialog" aria-modal="true" aria-label="App auf iPhone installieren">
+    <div class="install-modal__box">
+      <button class="install-modal__close" onclick="document.getElementById('iosModal').classList.remove('open')" aria-label="Schließen">✕</button>
+      <h3>App auf iPhone / iPad installieren</h3>
+      <ol class="install-modal__steps">
+        <li>Öffne die Website in <strong>Safari</strong></li>
+        <li>Tippe auf das <strong>Teilen-Symbol</strong> (Quadrat mit Pfeil nach oben)</li>
+        <li>Scrolle und tippe auf <strong>„Zum Home-Bildschirm"</strong></li>
+        <li>Namen bestätigen → <strong>„Hinzufügen"</strong> tippen</li>
+        <li>Das App-Icon erscheint auf deinem Homescreen ✅</li>
+      </ol>
+      <button class="btn btn--primary" onclick="document.getElementById('iosModal').classList.remove('open')">Verstanden</button>
+    </div>
+  </div>
+
+  <!-- ===== INSTALL BANNER ===== -->
+  <div class="install-banner" id="installBanner" role="alertdialog" aria-label="App installieren">
+    <div class="install-banner__icon">👋</div>
+    <div class="install-banner__text">
+      <strong>Als App installieren</strong>
+      <span>Offline nutzbar · kein Browser nötig</span>
+    </div>
+    <button class="install-banner__btn" id="installBtn">Installieren</button>
+    <button class="install-banner__dismiss" id="installDismiss" aria-label="Schließen">✕</button>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>© 2026 DGS Stammtisch Hamburg &amp; Umgebung</p>
+      <nav aria-label="Footer-Navigation">
+        <a href="#treffpunkte">Treffpunkte</a>
+        <a href="#termine">Termine</a>
+        <a href="#events">Events</a>
+        <a href="#galerie">Galerie</a>
+        <a href="#karte">Karte</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
