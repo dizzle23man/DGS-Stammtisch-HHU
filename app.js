@@ -607,7 +607,7 @@ function addToCalendar(tid) {
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//DGS Stammtisch HH//DE",
+    "PRODID:-//DGS Stammtisch HHU//DE",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VTIMEZONE",
