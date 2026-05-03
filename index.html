@@ -318,6 +318,58 @@
     </div>
   </div>
 
+  <!-- ===== ADMIN FAB (Floating-Button unten rechts) ===== -->
+  <button type="button" class="admin-fab" id="adminFab" aria-label="Admin-Login" title="Admin-Login">🔐</button>
+
+  <!-- ===== ADMIN LOGIN MODAL ===== -->
+  <div class="install-modal admin-modal" id="adminLoginModal" role="dialog" aria-modal="true" aria-label="Admin-Login">
+    <div class="install-modal__box admin-modal__box">
+      <button class="install-modal__close" id="adminLoginClose" aria-label="Schließen">✕</button>
+      <h3>🔐 Admin-Login</h3>
+      <p class="admin-modal__hint">Nur für das Admin-Team. Passwort kennt euer Admin.</p>
+      <form id="adminLoginForm" autocomplete="off">
+        <input type="password" id="adminPasswordInput" class="admin-input" placeholder="Admin-Passwort" autocomplete="current-password" required />
+        <p class="admin-modal__error" id="adminLoginError" aria-live="polite"></p>
+        <button type="submit" class="btn btn--primary admin-modal__submit">Einloggen</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== TERMIN EDITOR MODAL ===== -->
+  <div class="install-modal admin-modal" id="terminModal" role="dialog" aria-modal="true" aria-label="Termin bearbeiten">
+    <div class="install-modal__box admin-modal__box">
+      <button class="install-modal__close" id="terminClose" aria-label="Schließen">✕</button>
+      <h3 id="terminModalTitle">Neuer Termin</h3>
+      <form id="terminForm" autocomplete="off">
+        <input type="hidden" id="terminId" />
+        <label class="admin-label">Datum
+          <input type="date" id="terminDate" class="admin-input" required />
+        </label>
+        <label class="admin-label">Treffpunkt
+          <select id="terminLocation" class="admin-input" required></select>
+        </label>
+        <div class="admin-custom hidden" id="terminCustom">
+          <label class="admin-label">Titel des Treffpunkts
+            <input type="text" id="terminCustomTitle" class="admin-input" placeholder="z.B. Café Müller" />
+          </label>
+          <label class="admin-label">Info-Zeile
+            <input type="text" id="terminCustomInfo" class="admin-input" placeholder="z.B. 5. Donnerstag, Sonderausgabe" />
+          </label>
+          <label class="admin-label">Adresse / Stadtteil
+            <input type="text" id="terminCustomOrt" class="admin-input" placeholder="z.B. Eppendorfer Weg, Hamburg" />
+          </label>
+        </div>
+        <label class="admin-label">Notiz (optional)
+          <input type="text" id="terminNote" class="admin-input" placeholder="z.B. ohne Anmeldung, mit Workshop, Sonderausgabe" />
+        </label>
+        <div class="admin-modal__actions">
+          <button type="button" class="btn btn--outline" id="terminCancel">Abbrechen</button>
+          <button type="submit" class="btn btn--primary">💾 Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ===== NAME MODAL (für RSVP) ===== -->
   <div class="install-modal" id="nameModal" role="dialog" aria-modal="true" aria-label="Name eingeben">
     <div class="install-modal__box">

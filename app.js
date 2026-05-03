@@ -5,8 +5,11 @@
 // ── Firebase (RSVP-System) ─────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getDatabase, ref, set, remove, onValue, serverTimestamp
+  getDatabase, ref, set, push, remove, onValue, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyARSPCvSXn7KkJc9HSUCAAKDr7jVqi9QJY",
@@ -20,16 +23,70 @@ const firebaseConfig = {
 };
 
 let db = null;
+let auth = null;
+let fbApp = null;
 try {
-  const fbApp = initializeApp(firebaseConfig);
+  fbApp = initializeApp(firebaseConfig);
   db = getDatabase(fbApp);
+  auth = getAuth(fbApp);
+  setPersistence(auth, browserLocalPersistence).catch(()=>{});
 } catch (e) {
   console.warn("Firebase nicht initialisiert:", e);
 }
 
+// ── Admin-Auth ──────────────────────────────────────
+const ADMIN_EMAIL = "admin@dgs-stammtisch-hamburg.de"; // ← falls du eine andere Mail genommen hast, hier anpassen
+let isAdmin = false;
+
+function setupAuthObserver() {
+  if (!auth) return;
+  onAuthStateChanged(auth, user => {
+    isAdmin = !!user;
+    document.body.classList.toggle("is-admin", isAdmin);
+    updateAdminFab();
+    // Termine neu rendern, damit Admin-Buttons (de)aktiviert werden
+    renderTermine();
+  });
+}
+
+async function adminLogin(password) {
+  if (!auth) return { ok: false, error: "Firebase nicht verfügbar" };
+  try {
+    await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: humanizeAuthError(e.code) };
+  }
+}
+
+async function adminLogout() {
+  if (!auth) return;
+  await signOut(auth);
+}
+
+function humanizeAuthError(code) {
+  const map = {
+    "auth/invalid-credential": "Falsches Passwort",
+    "auth/wrong-password":     "Falsches Passwort",
+    "auth/user-not-found":     "Admin-Account nicht eingerichtet (siehe Firebase Console)",
+    "auth/too-many-requests":  "Zu viele Versuche – kurz warten",
+    "auth/network-request-failed": "Keine Internetverbindung"
+  };
+  return map[code] || ("Login-Fehler: " + (code || "unbekannt"));
+}
+
+function updateAdminFab() {
+  const fab = document.getElementById("adminFab");
+  if (!fab) return;
+  fab.textContent = isAdmin ? "🛠️" : "🔐";
+  fab.title = isAdmin ? "Admin-Modus aktiv" : "Admin-Login";
+}
+
 // ── Daten ──────────────────────────────────────────
 
-const TERMINE = [
+// Initial-Termine: werden beim ersten Admin-Login auf Knopfdruck nach Firebase übernommen.
+// Danach pflegt das Admin-Team alles direkt über die Website.
+const INITIAL_TERMINE = [
   {
     day: "07", month: "Mai", year: 2026,
     title: "Markt König (Rindermarkthalle)",
@@ -101,6 +158,9 @@ const TERMINE = [
     tag: "Monatlich"
   }
 ];
+
+// Live-Termine aus Firebase (werden via subscribeTermine() aktualisiert)
+let TERMINE = INITIAL_TERMINE.slice();
 
 const EVENTS = [
   {
@@ -220,20 +280,57 @@ function terminId(t) {
 
 function renderTermine() {
   const grid = document.getElementById("termineGrid");
-  grid.innerHTML = TERMINE.map(t => {
+  if (!grid) return;
+
+  // Filter: Termine ab heute - 1 Tag (Vergangene blenden wir aus)
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - 1);
+
+  const visible = (TERMINE || [])
+    .filter(t => {
+      const m = MONTH_NUM[t.month];
+      if (!m) return true;
+      const d = new Date(`${t.year}-${m}-${String(t.day).padStart(2,"0")}`);
+      return isNaN(d) ? true : d >= cutoff;
+    })
+    .sort((a, b) => {
+      const am = MONTH_NUM[a.month] || "00";
+      const bm = MONTH_NUM[b.month] || "00";
+      return `${a.year}-${am}-${String(a.day).padStart(2,"0")}`
+        .localeCompare(`${b.year}-${bm}-${String(b.day).padStart(2,"0")}`);
+    });
+
+  const adminToolbar = isAdmin
+    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="terminAddBtn">➕ Neuer Termin</button>${TERMINE.length === 0 ? ' <button class="btn btn--outline" id="initialMigrateBtn">📥 Initial-Daten laden</button>' : ''}</div>`
+    : "";
+
+  if (!visible.length && !isAdmin) {
+    grid.innerHTML = `<p class="termine-empty">Aktuell keine Termine geplant. Schau bald wieder vorbei!</p>`;
+    return;
+  }
+
+  grid.innerHTML = adminToolbar + visible.map(t => {
     const tid = terminId(t);
     const dateBadge = t.day
       ? `<div class="termin-card__day">${t.day}</div>
          <div class="termin-card__month">${t.month}</div>`
       : `<div class="termin-card__day" style="font-size:.9rem">?</div>
          <div class="termin-card__month">${t.month}</div>`;
+    const adminBtns = isAdmin && t.id ? `
+        <div class="termin-card__admin">
+          <button type="button" class="card-btn" data-action="edit-termin" data-id="${t.id}" title="Bearbeiten">✏️</button>
+          <button type="button" class="card-btn card-btn--danger" data-action="delete-termin" data-id="${t.id}" title="Löschen">🗑️</button>
+        </div>` : "";
     return `
     <article class="termin-card" data-termin-id="${tid}">
+      ${adminBtns}
       <div class="termin-card__date">${dateBadge}</div>
       <div class="termin-card__info">
-        <h3>${t.title}</h3>
-        <p>${t.info}</p>
-        <p>${t.ort}</p>
+        <h3>${escapeHtml(t.title)}</h3>
+        <p>${escapeHtml(t.info || "")}</p>
+        <p>${escapeHtml(t.ort || "")}</p>
+        ${t.note ? `<p class="termin-card__note">📌 ${escapeHtml(t.note)}</p>` : ""}
         <div class="rsvp">
           <div class="rsvp__buttons">
             <button class="rsvp-btn rsvp-btn--yes"   data-status="yes"   data-termin="${tid}">
@@ -258,23 +355,180 @@ function renderTermine() {
     </article>`;
   }).join("");
 
-  grid.addEventListener("click", e => {
-    const rsvpBtn = e.target.closest(".rsvp-btn");
-    if (rsvpBtn) {
-      handleRsvp(rsvpBtn.dataset.termin, rsvpBtn.dataset.status);
-      return;
+  // Admin-Toolbar-Buttons
+  document.getElementById("terminAddBtn")?.addEventListener("click", () => openTerminEditor());
+  document.getElementById("initialMigrateBtn")?.addEventListener("click", initialMigrate);
+
+  // Re-attach RSVP- und Admin-Click-Listener
+  if (!grid.dataset.bound) {
+    grid.dataset.bound = "1";
+    grid.addEventListener("click", e => {
+      const rsvpBtn = e.target.closest(".rsvp-btn");
+      if (rsvpBtn) { handleRsvp(rsvpBtn.dataset.termin, rsvpBtn.dataset.status); return; }
+      const statusBtn = e.target.closest(".rsvp-status");
+      if (statusBtn) { toggleNamesDisplay(statusBtn); return; }
+      const calBtn = e.target.closest(".rsvp__cal");
+      if (calBtn) { addToCalendar(calBtn.dataset.termin); return; }
+      const editBtn = e.target.closest('[data-action="edit-termin"]');
+      if (editBtn) { openTerminEditor(editBtn.dataset.id); return; }
+      const delBtn = e.target.closest('[data-action="delete-termin"]');
+      if (delBtn) { deleteTermin(delBtn.dataset.id); return; }
+    });
+  }
+
+  // Live-Aktualisierung: RSVP-Counts neu binden
+  if (typeof rsvpsCache !== "undefined") {
+    document.querySelectorAll(".termin-card[data-termin-id]").forEach(card => {
+      updateCardCounts(card, rsvpsCache[card.dataset.terminId] || []);
+    });
+  }
+}
+
+// ── Admin: Termine CRUD ─────────────────────────────
+
+function subscribeTermine() {
+  if (!db) return;
+  onValue(ref(db, "termine"), snapshot => {
+    const data = snapshot.val();
+    if (data && typeof data === "object") {
+      TERMINE = Object.entries(data).map(([id, t]) => ({ id, ...t }));
+    } else {
+      // Firebase noch leer → INITIAL_TERMINE als Fallback (nur Anzeige, nicht Firebase-gesichert)
+      TERMINE = INITIAL_TERMINE.slice();
     }
-    const statusBtn = e.target.closest(".rsvp-status");
-    if (statusBtn) {
-      toggleNamesDisplay(statusBtn);
-      return;
-    }
-    const calBtn = e.target.closest(".rsvp__cal");
-    if (calBtn) {
-      addToCalendar(calBtn.dataset.termin);
-      return;
-    }
+    renderTermine();
   });
+}
+
+async function initialMigrate() {
+  if (!isAdmin || !db) return;
+  if (!confirm("Initial-Daten in Firebase laden? (10 Termine werden angelegt)")) return;
+  try {
+    for (const t of INITIAL_TERMINE) {
+      const newRef = push(ref(db, "termine"));
+      await set(newRef, { ...t, createdAt: serverTimestamp() });
+    }
+    alert("Fertig – Termine sind jetzt in Firebase. Du kannst sie ab jetzt direkt auf der Website verwalten.");
+  } catch (e) {
+    console.error(e);
+    alert("Fehler beim Hochladen: " + e.message);
+  }
+}
+
+function openTerminEditor(id = null) {
+  const modal = document.getElementById("terminModal");
+  if (!modal) return;
+  const form = document.getElementById("terminForm");
+  form.reset();
+  document.getElementById("terminId").value = id || "";
+  document.getElementById("terminModalTitle").textContent = id ? "Termin bearbeiten" : "Neuer Termin";
+
+  // Treffpunkt-Dropdown füllen
+  const sel = document.getElementById("terminLocation");
+  sel.innerHTML = `<option value="">— Treffpunkt wählen —</option>` +
+    LOCATIONS.map(l => `<option value="${escapeHtml(l.name)}" data-info="${escapeHtml(l.info?.replace(/<[^>]+>/g,"").split("\n")[0] || "")}" data-address="${escapeHtml(l.address || "")}">${escapeHtml(l.name)}</option>`).join("") +
+    `<option value="__custom__">Eigener Treffpunkt …</option>`;
+
+  if (id) {
+    const t = TERMINE.find(x => x.id === id);
+    if (t) {
+      const m = MONTH_NUM[t.month] || "01";
+      document.getElementById("terminDate").value = `${t.year}-${m}-${String(t.day).padStart(2,"0")}`;
+      // Match Treffpunkt
+      const known = LOCATIONS.find(l => l.name === t.title);
+      if (known) {
+        sel.value = known.name;
+        document.getElementById("terminCustom").classList.add("hidden");
+      } else {
+        sel.value = "__custom__";
+        document.getElementById("terminCustom").classList.remove("hidden");
+        document.getElementById("terminCustomTitle").value = t.title || "";
+        document.getElementById("terminCustomInfo").value  = t.info || "";
+        document.getElementById("terminCustomOrt").value   = t.ort || "";
+      }
+      document.getElementById("terminNote").value = t.note || "";
+    }
+  } else {
+    document.getElementById("terminCustom").classList.add("hidden");
+  }
+
+  sel.onchange = () => {
+    document.getElementById("terminCustom").classList.toggle("hidden", sel.value !== "__custom__");
+  };
+
+  modal.classList.add("open");
+}
+
+function closeTerminEditor() {
+  document.getElementById("terminModal")?.classList.remove("open");
+}
+
+async function saveTerminFromForm(e) {
+  e.preventDefault();
+  if (!isAdmin || !db) { alert("Nicht eingeloggt"); return; }
+  const id   = document.getElementById("terminId").value;
+  const date = document.getElementById("terminDate").value;
+  const sel  = document.getElementById("terminLocation").value;
+  const note = document.getElementById("terminNote").value.trim();
+
+  if (!date || !sel) { alert("Datum und Treffpunkt sind Pflicht."); return; }
+
+  const [y, m, d] = date.split("-");
+  const monthNames = { "01":"Jan","02":"Feb","03":"Mär","04":"Apr","05":"Mai","06":"Jun","07":"Jul","08":"Aug","09":"Sep","10":"Okt","11":"Nov","12":"Dez" };
+
+  let title, info, ort;
+  if (sel === "__custom__") {
+    title = document.getElementById("terminCustomTitle").value.trim();
+    info  = document.getElementById("terminCustomInfo").value.trim();
+    ort   = document.getElementById("terminCustomOrt").value.trim();
+    if (!title) { alert("Titel des Treffpunkts fehlt."); return; }
+  } else {
+    const loc = LOCATIONS.find(l => l.name === sel);
+    title = sel;
+    info  = inferTerminInfo(date);
+    ort   = loc?.address || sel;
+  }
+
+  const data = {
+    day: d, month: monthNames[m] || "Mai", year: parseInt(y, 10),
+    title, info, ort, tag: "Monatlich",
+    note: note || null,
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    if (id) {
+      await set(ref(db, `termine/${id}`), { ...data });
+    } else {
+      const newRef = push(ref(db, "termine"));
+      await set(newRef, data);
+    }
+    closeTerminEditor();
+  } catch (err) {
+    console.error(err);
+    alert("Speichern fehlgeschlagen: " + err.message);
+  }
+}
+
+function inferTerminInfo(isoDate) {
+  // Generiert z.B. "1. Donnerstag im Monat" automatisch aus dem Datum
+  const d = new Date(isoDate);
+  const dayOfMonth = d.getDate();
+  const ordinal = Math.ceil(dayOfMonth / 7);
+  const ordinals = ["1.", "2.", "3.", "4.", "5."];
+  const weekdays = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+  return `${ordinals[ordinal-1] || ordinal+"."} ${weekdays[d.getDay()]} im Monat`;
+}
+
+async function deleteTermin(id) {
+  if (!isAdmin || !db) return;
+  const t = TERMINE.find(x => x.id === id);
+  if (!confirm(`Termin "${t?.title}" am ${t?.day}. ${t?.month} wirklich löschen?`)) return;
+  try {
+    await remove(ref(db, `termine/${id}`));
+  } catch (e) {
+    alert("Löschen fehlgeschlagen: " + e.message);
+  }
 }
 
 // ── RSVP-Logik ──────────────────────────────────────
@@ -430,6 +684,7 @@ function askName() {
   });
 }
 
+let rsvpsCache = {};
 function initRsvpSubscription() {
   if (!db) return;
   onValue(ref(db, "rsvps"), snapshot => {
@@ -439,6 +694,7 @@ function initRsvpSubscription() {
       if (!r || !r.terminId) return;
       (byTermin[r.terminId] ||= []).push(r);
     });
+    rsvpsCache = byTermin;
     document.querySelectorAll(".termin-card[data-termin-id]").forEach(card => {
       updateCardCounts(card, byTermin[card.dataset.terminId] || []);
     });
@@ -936,7 +1192,52 @@ document.addEventListener("DOMContentLoaded", () => {
   initPWA();
   initRsvpSubscription();
   initNavModal();
+  setupAuthObserver();
+  subscribeTermine();
+  initAdminUi();
 });
+
+// ── Admin-UI (Login + Termin-Editor) ─────────────────
+
+function initAdminUi() {
+  // FAB
+  const fab = document.getElementById("adminFab");
+  fab?.addEventListener("click", () => {
+    if (isAdmin) {
+      if (confirm("Admin-Modus beenden (ausloggen)?")) adminLogout();
+    } else {
+      document.getElementById("adminLoginModal")?.classList.add("open");
+      setTimeout(() => document.getElementById("adminPasswordInput")?.focus(), 50);
+    }
+  });
+
+  // Login-Modal
+  const loginModal = document.getElementById("adminLoginModal");
+  document.getElementById("adminLoginClose")?.addEventListener("click", () => loginModal?.classList.remove("open"));
+  document.getElementById("adminLoginForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const pw = document.getElementById("adminPasswordInput").value;
+    const errEl = document.getElementById("adminLoginError");
+    errEl.textContent = "Login läuft …";
+    const res = await adminLogin(pw);
+    if (res.ok) {
+      loginModal?.classList.remove("open");
+      errEl.textContent = "";
+      document.getElementById("adminPasswordInput").value = "";
+    } else {
+      errEl.textContent = "❌ " + res.error;
+    }
+  });
+
+  // Termin-Modal
+  const tModal = document.getElementById("terminModal");
+  document.getElementById("terminClose")?.addEventListener("click", closeTerminEditor);
+  document.getElementById("terminCancel")?.addEventListener("click", closeTerminEditor);
+  document.getElementById("terminForm")?.addEventListener("submit", saveTerminFromForm);
+  tModal?.addEventListener("click", e => { if (e.target === tModal) closeTerminEditor(); });
+
+  updateAdminFab();
+}
 
 // ── Navigation-App-Auswahl ─────────────────────────
 
