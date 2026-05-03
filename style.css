@@ -1270,6 +1270,16 @@ body.is-admin .admin-fab {
   border-left: 3px solid var(--accent);
 }
 .admin-custom.hidden { display: none; }
+.admin-modal__box--wide { max-width: 560px; }
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem 1rem;
+}
+@media (max-width: 480px) {
+  .admin-grid-2 { grid-template-columns: 1fr; }
+}
+.gmaps__card { position: relative; }
 
 /* ===== INSTALL MODALS (Edge / iOS Anleitung) ===== */
 .install-modal {
