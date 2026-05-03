@@ -1559,20 +1559,21 @@ const DGS_WORDS = [
   "Treffen","Essen","Trinken","Café","Wochenende","Schön","Tag","Abend","Sommer","Winter",
   "Buch","Lernen","Sprache","Hand","Gebärden","Taub","Hörend","Gemeinschaft","Kultur","Freude"
 ];
+
 function renderWordOfDay() {
   const wEl = document.getElementById("wordOfDayWord");
   const dEl = document.getElementById("wordOfDayDate");
   const lEl = document.getElementById("wordOfDayLink");
+  const hEl = document.getElementById("wordOfDayHint");
   if (!wEl) return;
-  // Tag des Jahres → Wort-Index
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor((now - start) / 86400000);
   const word = DGS_WORDS[dayOfYear % DGS_WORDS.length];
   wEl.textContent = word;
   dEl.textContent = now.toLocaleDateString("de-DE", { weekday:"long", day:"numeric", month:"long" });
-  // SignDict-Link (öffentliches DGS-Wörterbuch)
-  lEl.href = `https://signdict.org/de/sign/${encodeURIComponent(word.toLowerCase())}`;
+  lEl.href = `https://www.spreadthesign.com/de.de/search/?q=${encodeURIComponent(word)}`;
+  if (hEl) hEl.textContent = "Suche im Spreadthesign-Wörterbuch.";
 }
 
 // ── 🎮 DGS-Memory ──────────────────────────────────
