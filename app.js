@@ -1646,7 +1646,7 @@ const RECOS = [
   { emoji:"📖", title:"SignDict",        desc:"Offenes DGS-Wörterbuch von der Community.",        url:"https://signdict.org/de" },
   { emoji:"🌍", title:"Spreadthesign",   desc:"Internationale Gebärdensprach-Datenbank.",          url:"https://www.spreadthesign.com/de.de/search/" },
   { emoji:"🎓", title:"DGS-Korpus Uni HH",desc:"Wissenschaftliches DGS-Wörterbuch der Uni Hamburg.",url:"https://www.sign-lang.uni-hamburg.de/dgs-korpus/" },
-  { emoji:"📺", title:"YouTube: Manimundo",desc:"DGS-Lernvideos für Anfänger und Fortgeschrittene.", url:"https://www.youtube.com/@manimundo" },
+  { emoji:"📺", title:"YouTube: Manimundo",desc:"DGS-Lernvideos für Anfänger und Fortgeschrittene.", url:"https://www.youtube.com/@manimundogmbh6507" },
   { emoji:"📱", title:"App: GebärdenSchatz",desc:"Gebärden lernen unterwegs (iOS/Android).",       url:"https://www.gebaerdenschatz.de" },
   { emoji:"🏫", title:"VHS DGS-Kurse",   desc:"DGS-Kurse an der Volkshochschule Hamburg.",         url:"https://www.vhs-hamburg.de/" },
   { emoji:"🤝", title:"Gehörlosenverband HH",desc:"Hamburgs Gehörlosenverband – Beratung und Events.",url:"https://www.glvhh.de" },
