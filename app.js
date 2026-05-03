@@ -382,10 +382,11 @@ function renderTermine() {
     });
   }
 
-  // Live-Aktualisierung: RSVP-Counts neu binden
+  // Live-Aktualisierung: RSVP-Counts + Check-in neu binden
   if (typeof rsvpsCache !== "undefined") {
     document.querySelectorAll(".termin-card[data-termin-id]").forEach(card => {
       updateCardCounts(card, rsvpsCache[card.dataset.terminId] || []);
+      updateCheckinDisplay(card);
     });
   }
 }
@@ -1507,7 +1508,240 @@ document.addEventListener("DOMContentLoaded", () => {
   subscribeEvents();
   subscribeLocations();
   initAdminUi();
+  // Neue Widgets:
+  loadWeather();
+  renderWordOfDay();
+  initMemory();
+  renderRecos();
+  subscribeCheckins();
 });
+
+// ── 🌤️ Wetter (Open-Meteo, kostenlos, kein API-Key) ──
+
+const WEATHER_ICONS = {
+  0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️",
+  45:"🌫️", 48:"🌫️",
+  51:"🌦️", 53:"🌦️", 55:"🌦️",
+  56:"🌧️", 57:"🌧️",
+  61:"🌧️", 63:"🌧️", 65:"🌧️",
+  66:"🌧️", 67:"🌧️",
+  71:"🌨️", 73:"🌨️", 75:"❄️", 77:"❄️",
+  80:"🌦️", 81:"🌧️", 82:"⛈️",
+  85:"🌨️", 86:"❄️",
+  95:"⛈️", 96:"⛈️", 99:"⛈️"
+};
+async function loadWeather() {
+  const el = document.getElementById("weatherWidget");
+  if (!el) return;
+  try {
+    const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=53.55&longitude=10.0&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=2&timezone=Europe%2FBerlin");
+    if (!res.ok) throw new Error("weather " + res.status);
+    const j = await res.json();
+    const cur = j.current;
+    const today = j.daily;
+    const icon = WEATHER_ICONS[cur.weather_code] || "🌤️";
+    const t = Math.round(cur.temperature_2m);
+    const tmin = Math.round(today.temperature_2m_min[0]);
+    const tmax = Math.round(today.temperature_2m_max[0]);
+    el.innerHTML = `
+      <span class="weather-widget__icon">${icon}</span>
+      <span class="weather-widget__main">${t}°C in Hamburg</span>
+      <span class="weather-widget__sub">heute ${tmin}–${tmax}°</span>`;
+  } catch (e) {
+    el.innerHTML = "";
+  }
+}
+
+// ── 🤟 DGS-Wort des Tages ──────────────────────────
+
+const DGS_WORDS = [
+  "Hallo","Danke","Bitte","Ja","Nein","Liebe","Freund","Familie","Hamburg","Stammtisch",
+  "Treffen","Essen","Trinken","Café","Wochenende","Schön","Tag","Abend","Sommer","Winter",
+  "Buch","Lernen","Sprache","Hand","Gebärden","Taub","Hörend","Gemeinschaft","Kultur","Freude"
+];
+function renderWordOfDay() {
+  const wEl = document.getElementById("wordOfDayWord");
+  const dEl = document.getElementById("wordOfDayDate");
+  const lEl = document.getElementById("wordOfDayLink");
+  if (!wEl) return;
+  // Tag des Jahres → Wort-Index
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  const word = DGS_WORDS[dayOfYear % DGS_WORDS.length];
+  wEl.textContent = word;
+  dEl.textContent = now.toLocaleDateString("de-DE", { weekday:"long", day:"numeric", month:"long" });
+  // SignDict-Link (öffentliches DGS-Wörterbuch)
+  lEl.href = `https://signdict.org/de/sign/${encodeURIComponent(word.toLowerCase())}`;
+}
+
+// ── 🎮 DGS-Memory ──────────────────────────────────
+
+const MEMORY_EMOJIS = ["👋","✋","🤚","👌","🤟","👍","✌️","🤙"];
+let memoryState = null;
+
+function initMemory() {
+  const board = document.getElementById("memoryBoard");
+  if (!board) return;
+  document.getElementById("memoryReset")?.addEventListener("click", startMemory);
+  startMemory();
+}
+
+function startMemory() {
+  const board = document.getElementById("memoryBoard");
+  const movesEl = document.getElementById("memoryMoves");
+  const timeEl  = document.getElementById("memoryTime");
+  const winEl   = document.getElementById("memoryWin");
+  if (!board) return;
+  // 6 Paare = 12 Karten (4×3)
+  const pairs = MEMORY_EMOJIS.slice(0, 6);
+  const deck = [...pairs, ...pairs].sort(() => Math.random() - 0.5);
+  memoryState = { deck, flipped: [], moves: 0, matched: 0, startTime: Date.now(), interval: null };
+  movesEl.textContent = "0";
+  timeEl.textContent  = "0:00";
+  winEl.hidden = true;
+  if (memoryState.interval) clearInterval(memoryState.interval);
+  memoryState.interval = setInterval(() => {
+    const sec = Math.floor((Date.now() - memoryState.startTime) / 1000);
+    timeEl.textContent = `${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}`;
+  }, 1000);
+  board.innerHTML = deck.map((emoji, i) =>
+    `<button class="memory-card" data-i="${i}" data-emoji="${emoji}" type="button" aria-label="Karte ${i+1}"><span class="memory-card__inner"><span class="memory-card__back">🎴</span><span class="memory-card__front">${emoji}</span></span></button>`
+  ).join("");
+  board.querySelectorAll(".memory-card").forEach(c => c.addEventListener("click", () => flipCard(c)));
+}
+
+function flipCard(card) {
+  if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
+  if (memoryState.flipped.length === 2) return;
+  card.classList.add("flipped");
+  memoryState.flipped.push(card);
+  if (memoryState.flipped.length === 2) {
+    memoryState.moves++;
+    document.getElementById("memoryMoves").textContent = memoryState.moves;
+    const [a, b] = memoryState.flipped;
+    if (a.dataset.emoji === b.dataset.emoji) {
+      setTimeout(() => {
+        a.classList.add("matched"); b.classList.add("matched");
+        memoryState.flipped = [];
+        memoryState.matched++;
+        if (memoryState.matched === 6) {
+          clearInterval(memoryState.interval);
+          document.getElementById("memoryWin").hidden = false;
+        }
+      }, 350);
+    } else {
+      setTimeout(() => {
+        a.classList.remove("flipped"); b.classList.remove("flipped");
+        memoryState.flipped = [];
+      }, 900);
+    }
+  }
+}
+
+// ── 📚 DGS-Lern-Empfehlungen ───────────────────────
+
+const RECOS = [
+  { emoji:"📖", title:"SignDict",        desc:"Offenes DGS-Wörterbuch von der Community.",        url:"https://signdict.org/de" },
+  { emoji:"🌍", title:"Spreadthesign",   desc:"Internationale Gebärdensprach-Datenbank.",          url:"https://www.spreadthesign.com/de.de/search/" },
+  { emoji:"🎓", title:"DGS-Korpus Uni HH",desc:"Wissenschaftliches DGS-Wörterbuch der Uni Hamburg.",url:"https://www.sign-lang.uni-hamburg.de/dgs-korpus/" },
+  { emoji:"📺", title:"YouTube: Manimundo",desc:"DGS-Lernvideos für Anfänger und Fortgeschrittene.", url:"https://www.youtube.com/@manimundo" },
+  { emoji:"📱", title:"App: GebärdenSchatz",desc:"Gebärden lernen unterwegs (iOS/Android).",       url:"https://www.gebaerdenschatz.de" },
+  { emoji:"🏫", title:"VHS DGS-Kurse",   desc:"DGS-Kurse an der Volkshochschule Hamburg.",         url:"https://www.vhs-hamburg.de/" },
+  { emoji:"🤝", title:"Gehörlosenverband HH",desc:"Hamburgs Gehörlosenverband – Beratung und Events.",url:"https://www.glvhh.de" },
+  { emoji:"📚", title:"DGS-Kinderbuch-Verlag",desc:"Bücher & Lernmaterial mit DGS für Familien.",  url:"https://gebaerdenstube.de/" }
+];
+function renderRecos() {
+  const grid = document.getElementById("recosGrid");
+  if (!grid) return;
+  grid.innerHTML = RECOS.map(r => `
+    <a class="reco-card" href="${r.url}" target="_blank" rel="noopener noreferrer">
+      <span class="reco-card__emoji">${r.emoji}</span>
+      <div>
+        <h4>${escapeHtml(r.title)}</h4>
+        <p>${escapeHtml(r.desc)}</p>
+      </div>
+    </a>`).join("");
+}
+
+// ── ✋ Live Check-in ───────────────────────────────
+
+let checkinsCache = {};
+const CHECKIN_TTL_MS = 4 * 60 * 60 * 1000; // 4 Stunden
+
+function subscribeCheckins() {
+  if (!db) return;
+  onValue(ref(db, "checkins"), snapshot => {
+    const all = snapshot.val() || {};
+    const now = Date.now();
+    const byTermin = {};
+    Object.entries(all).forEach(([id, c]) => {
+      if (!c?.terminId || !c?.ts) return;
+      if (now - c.ts > CHECKIN_TTL_MS) return; // älter als 4 h
+      (byTermin[c.terminId] ||= []).push(c);
+    });
+    checkinsCache = byTermin;
+    document.querySelectorAll(".termin-card[data-termin-id]").forEach(updateCheckinDisplay);
+  });
+}
+
+function updateCheckinDisplay(card) {
+  const tid = card.dataset.terminId;
+  const list = checkinsCache[tid] || [];
+  let widget = card.querySelector(".checkin");
+  if (!isTerminToday(tid)) { widget?.remove(); return; }
+  if (!widget) {
+    widget = document.createElement("div");
+    widget.className = "checkin";
+    widget.innerHTML = `
+      <button type="button" class="checkin__btn" data-action="checkin">✋ Bin gerade da!</button>
+      <div class="checkin__list"></div>`;
+    card.querySelector(".rsvp")?.appendChild(widget);
+    widget.querySelector(".checkin__btn").addEventListener("click", () => doCheckin(tid));
+  }
+  const myName = (localStorage.getItem("dgs_name") || "").toLowerCase();
+  const me = list.find(c => c.name.toLowerCase() === myName);
+  widget.querySelector(".checkin__btn").classList.toggle("active", !!me);
+  widget.querySelector(".checkin__btn").textContent = me ? "✅ Du bist eingecheckt" : "✋ Bin gerade da!";
+  const others = list.filter(c => c.name.toLowerCase() !== myName);
+  const namesLine = list.length === 0
+    ? `<em>Noch niemand eingecheckt</em>`
+    : `<strong>👀 Vor Ort:</strong> ${list.map(c => escapeHtml(c.name)).join(", ")}`;
+  widget.querySelector(".checkin__list").innerHTML = namesLine;
+}
+
+function isTerminToday(tid) {
+  // tid format: "2026-05-07_..."
+  const m = tid.match(/^(\d{4})-(\d{2})-(\d{2})_/);
+  if (!m) return false;
+  const today = new Date();
+  const t = new Date(m[1] + "-" + m[2] + "-" + m[3]);
+  return t.toDateString() === today.toDateString();
+}
+
+async function doCheckin(tid) {
+  if (!db) return;
+  let name = localStorage.getItem("dgs_name");
+  if (!name) {
+    name = await askName();
+    if (!name) return;
+    localStorage.setItem("dgs_name", name);
+  }
+  const docId = `${tid}_${slugify(name)}`;
+  const card = document.querySelector(`.termin-card[data-termin-id="${tid}"]`);
+  const isCheckedIn = card?.querySelector(".checkin__btn.active");
+  try {
+    if (isCheckedIn) {
+      await remove(ref(db, `checkins/${docId}`));
+    } else {
+      await set(ref(db, `checkins/${docId}`), {
+        terminId: tid, name, ts: Date.now()
+      });
+    }
+  } catch (e) {
+    alert("Check-in fehlgeschlagen: " + e.message);
+  }
+}
 
 // ── Bild-Lightbox (Click-to-Zoom für Telegram-Bilder) ─
 
