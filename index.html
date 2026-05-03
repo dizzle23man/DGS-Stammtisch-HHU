@@ -94,89 +94,9 @@
   <section class="section" id="treffpunkte">
     <div class="container">
       <h2 class="section__title">Unsere <span class="accent">Treffpunkte</span></h2>
-      <p class="section__sub">Fünf Stammtische – einfach vorbeikommen, keine Anmeldung nötig!</p>
-      <div class="gmaps__grid">
-
-        <div class="gmaps__card">
-          <div class="gmaps__header">
-            <img class="gmaps__icon gmaps__icon--img" src="icons/markt-koenig.png" alt="Markt König Logo" loading="lazy" />
-            <div>
-              <p class="gmaps__when">1. Donnerstag im Monat</p>
-              <h3>Markt König (Rindermarkthalle)</h3>
-              <p class="gmaps__address">Neuer Kamp 31, 20359 Hamburg</p>
-            </div>
-          </div>
-          <div class="gmaps__frame-wrap">
-            <iframe src="https://maps.google.com/maps?q=Neuer+Kamp+31+20359+Hamburg&output=embed&z=16"
-              title="Karte Markt König Hamburg" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-          <button type="button" class="gmaps__nav-btn" data-address="Neuer Kamp 31, 20359 Hamburg" data-lat="53.5566" data-lng="9.9618" data-name="Markt König (Rindermarkthalle)">🧭 Navigation öffnen</button>
-        </div>
-
-        <div class="gmaps__card">
-          <div class="gmaps__header">
-            <img class="gmaps__icon gmaps__icon--img" src="icons/peacetanbul.png" alt="Peacetanbul Logo" loading="lazy" />
-            <div>
-              <p class="gmaps__when">2. Donnerstag im Monat</p>
-              <h3>Peacetanbul</h3>
-              <p class="gmaps__address">Jarrestraße 20, 22303 Hamburg</p>
-            </div>
-          </div>
-          <div class="gmaps__frame-wrap">
-            <iframe src="https://maps.google.com/maps?q=Jarrestra%C3%9Fe+20+22303+Hamburg&output=embed&z=16"
-              title="Karte Peacetanbul Hamburg" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-          <button type="button" class="gmaps__nav-btn" data-address="Jarrestraße 20, 22303 Hamburg" data-lat="53.5853" data-lng="10.0269" data-name="Peacetanbul">🧭 Navigation öffnen</button>
-        </div>
-
-        <div class="gmaps__card">
-          <div class="gmaps__header">
-            <img class="gmaps__icon gmaps__icon--img" src="icons/villa-im-park.png" alt="Villa im Park Logo" loading="lazy" />
-            <div>
-              <p class="gmaps__when">3. Donnerstag im Monat</p>
-              <h3>Villa im Park</h3>
-              <p class="gmaps__address">Else-Rauch-Platz 1, 20255 Hamburg</p>
-            </div>
-          </div>
-          <div class="gmaps__frame-wrap">
-            <iframe src="https://maps.google.com/maps?q=Else-Rauch-Platz+1+20255+Hamburg&output=embed&z=16"
-              title="Karte Villa im Park Hamburg" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-          <button type="button" class="gmaps__nav-btn" data-address="Else-Rauch-Platz 1, 20255 Hamburg" data-lat="53.5742" data-lng="9.9447" data-name="Villa im Park">🧭 Navigation öffnen</button>
-        </div>
-
-        <div class="gmaps__card">
-          <div class="gmaps__header">
-            <img class="gmaps__icon gmaps__icon--img" src="icons/lims.png" alt="Lim's Logo" loading="lazy" />
-            <div>
-              <p class="gmaps__when">3. Freitag im Monat</p>
-              <h3>Lim's – Buchholz</h3>
-              <p class="gmaps__address">Breite Str. 10, 21244 Buchholz</p>
-            </div>
-          </div>
-          <div class="gmaps__frame-wrap">
-            <iframe src="https://maps.google.com/maps?q=Breite+Str+10+21244+Buchholz+Nordheide&output=embed&z=16"
-              title="Karte Lim's Buchholz" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-          <button type="button" class="gmaps__nav-btn" data-address="Breite Str. 10, 21244 Buchholz" data-lat="53.3236" data-lng="9.8711" data-name="Lim's">🧭 Navigation öffnen</button>
-        </div>
-
-        <div class="gmaps__card">
-          <div class="gmaps__header">
-            <img class="gmaps__icon gmaps__icon--img" src="icons/schachcafe.png" alt="Barmbeker Schachcafé Logo" loading="lazy" />
-            <div>
-              <p class="gmaps__when">4. Donnerstag im Monat</p>
-              <h3>Barmbeker Schachcafé</h3>
-              <p class="gmaps__address">Rübenkamp 227, 22307 Hamburg</p>
-            </div>
-          </div>
-          <div class="gmaps__frame-wrap">
-            <iframe src="https://maps.google.com/maps?q=R%C3%BCbenkamp+227+22307+Hamburg&output=embed&z=16"
-              title="Karte Barmbeker Schachcafé Hamburg" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-          <button type="button" class="gmaps__nav-btn" data-address="Rübenkamp 227, 22307 Hamburg" data-lat="53.6004" data-lng="10.0388" data-name="Barmbeker Schachcafé">🧭 Navigation öffnen</button>
-        </div>
-
+      <p class="section__sub">Einfach vorbeikommen, keine Anmeldung nötig!</p>
+      <div class="gmaps__grid" id="treffpunkteGrid">
+        <!-- Wird dynamisch aus Firebase gerendert -->
       </div>
     </div>
   </section>
@@ -364,6 +284,80 @@
         </label>
         <div class="admin-modal__actions">
           <button type="button" class="btn btn--outline" id="terminCancel">Abbrechen</button>
+          <button type="submit" class="btn btn--primary">💾 Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== EVENT EDITOR MODAL ===== -->
+  <div class="install-modal admin-modal" id="eventModal" role="dialog" aria-modal="true" aria-label="Event bearbeiten">
+    <div class="install-modal__box admin-modal__box">
+      <button class="install-modal__close" id="eventClose" aria-label="Schließen">✕</button>
+      <h3 id="eventModalTitle">Neues Event</h3>
+      <form id="eventForm" autocomplete="off">
+        <input type="hidden" id="eventId" />
+        <label class="admin-label">Emoji
+          <input type="text" id="eventEmoji" class="admin-input" placeholder="🎬 / 📚 / 🚂 / 🎭 …" maxlength="4" />
+        </label>
+        <label class="admin-label">Datum
+          <input type="date" id="eventDate" class="admin-input" required />
+        </label>
+        <label class="admin-label">Titel
+          <input type="text" id="eventTitle" class="admin-input" placeholder="z.B. DGS-Filmabend" required />
+        </label>
+        <label class="admin-label">Beschreibung
+          <textarea id="eventDesc" class="admin-input" rows="4" placeholder="Was passiert beim Event?" required></textarea>
+        </label>
+        <div class="admin-modal__actions">
+          <button type="button" class="btn btn--outline" id="eventCancel">Abbrechen</button>
+          <button type="submit" class="btn btn--primary">💾 Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== LOCATION EDITOR MODAL ===== -->
+  <div class="install-modal admin-modal" id="locationModal" role="dialog" aria-modal="true" aria-label="Treffpunkt bearbeiten">
+    <div class="install-modal__box admin-modal__box admin-modal__box--wide">
+      <button class="install-modal__close" id="locationClose" aria-label="Schließen">✕</button>
+      <h3 id="locationModalTitle">Neuer Treffpunkt</h3>
+      <form id="locationForm" autocomplete="off">
+        <input type="hidden" id="locationId" />
+        <label class="admin-label">Name
+          <input type="text" id="locationName" class="admin-input" placeholder="z.B. Café Sonnenschein" required />
+        </label>
+        <label class="admin-label">Rhythmus
+          <input type="text" id="locationSchedule" class="admin-input" placeholder="z.B. 1. Donnerstag im Monat" />
+        </label>
+        <label class="admin-label">Adresse
+          <input type="text" id="locationAddress" class="admin-input" placeholder="Straße + PLZ + Stadt" required />
+        </label>
+        <div class="admin-grid-2">
+          <label class="admin-label">Latitude
+            <input type="number" id="locationLat" class="admin-input" step="0.0001" placeholder="53.5566" />
+          </label>
+          <label class="admin-label">Longitude
+            <input type="number" id="locationLng" class="admin-input" step="0.0001" placeholder="9.9618" />
+          </label>
+        </div>
+        <p class="admin-modal__hint">💡 Koordinaten findest du in Google Maps: Rechtsklick auf den Ort → erste Zeile sind „Latitude, Longitude". Die zwei Zahlen kommen oben in die Felder.</p>
+        <label class="admin-label">Logo-Datei (in icons/)
+          <input type="text" id="locationIconFile" class="admin-input" placeholder="z.B. cafe-sonne.png – leer lassen wenn keins" />
+        </label>
+        <div class="admin-grid-2">
+          <label class="admin-label">Telefon (optional)
+            <input type="text" id="locationPhone" class="admin-input" placeholder="040 1234567" />
+          </label>
+          <label class="admin-label">Reihenfolge
+            <input type="number" id="locationOrder" class="admin-input" min="1" placeholder="1" />
+          </label>
+        </div>
+        <label class="admin-label">Website (optional)
+          <input type="url" id="locationWebsite" class="admin-input" placeholder="https://..." />
+        </label>
+        <div class="admin-modal__actions">
+          <button type="button" class="btn btn--outline" id="locationCancel">Abbrechen</button>
           <button type="submit" class="btn btn--primary">💾 Speichern</button>
         </div>
       </form>

@@ -44,8 +44,10 @@ function setupAuthObserver() {
     isAdmin = !!user;
     document.body.classList.toggle("is-admin", isAdmin);
     updateAdminFab();
-    // Termine neu rendern, damit Admin-Buttons (de)aktiviert werden
+    // Alles neu rendern, damit Admin-Buttons erscheinen/verschwinden
     renderTermine();
+    renderEvents();
+    renderTreffpunkte();
   });
 }
 
@@ -162,7 +164,7 @@ const INITIAL_TERMINE = [
 // Live-Termine aus Firebase (werden via subscribeTermine() aktualisiert)
 let TERMINE = INITIAL_TERMINE.slice();
 
-const EVENTS = [
+const INITIAL_EVENTS = [
   {
     emoji: "🎬",
     date: "24. Mai 2026",
@@ -189,6 +191,8 @@ const EVENTS = [
   }
 ];
 
+let EVENTS = INITIAL_EVENTS.slice();
+
 // Telegram-Posts für die "Aktuelles"-Sektion
 // 👉 Neuer Post? Hier oben die ID einfügen (Format: "kanal/postid")
 //    Post-ID findest du in der URL eines Telegram-Posts (t.me/dgs_stammtisch_hhu/3 → 3)
@@ -199,58 +203,60 @@ const TELEGRAM_POSTS = [
 const TELEGRAM_CHANNEL = "dgs_stammtisch_hhu";
 
 // Stammtische mit Koordinaten für die Karte
-const LOCATIONS = [
+const INITIAL_LOCATIONS = [
   {
     name: "Markt König (Rindermarkthalle)",
-    lat: 53.5566, lng: 9.9618,
+    icon: "🥩", iconFile: "markt-koenig.png",
+    schedule: "1. Donnerstag im Monat",
     address: "Neuer Kamp 31, 20359 Hamburg",
-    info: `<strong>Markt König (Rindermarkthalle)</strong><br>
-           Neuer Kamp 31, 20359 Hamburg<br>
-           1. Donnerstag im Monat<br>
-           📞 <a href="tel:04043096135">040 43096135</a><br>
-           🌐 <a href="https://markt-koenig.de" target="_blank">markt-koenig.de</a>`
+    lat: 53.5566, lng: 9.9618,
+    phone: "040 43096135",
+    website: "https://markt-koenig.de",
+    order: 1
   },
   {
     name: "Peacetanbul",
-    lat: 53.5853, lng: 10.0269,
+    icon: "🌿", iconFile: "peacetanbul.png",
+    schedule: "2. Donnerstag im Monat",
     address: "Jarrestraße 20, 22303 Hamburg",
-    info: `<strong>Peacetanbul</strong><br>
-           Jarrestraße 20, 22303 Hamburg<br>
-           2. Donnerstag im Monat<br>
-           📞 <a href="tel:04069644975">040 69644975</a><br>
-           🌐 <a href="https://peacetanbul.de" target="_blank">peacetanbul.de</a>`
+    lat: 53.5853, lng: 10.0269,
+    phone: "040 69644975",
+    website: "https://peacetanbul.de",
+    order: 2
   },
   {
     name: "Villa im Park",
-    lat: 53.5742, lng: 9.9447,
+    icon: "🌳", iconFile: "villa-im-park.png",
+    schedule: "3. Donnerstag im Monat",
     address: "Else-Rauch-Platz 1, 20255 Hamburg",
-    info: `<strong>Villa im Park</strong><br>
-           Else-Rauch-Platz 1, 20255 Hamburg<br>
-           3. Donnerstag im Monat<br>
-           📞 <a href="tel:04043208844">040 43208844</a><br>
-           🌐 <a href="https://villa-im-park.de" target="_blank">villa-im-park.de</a>`
+    lat: 53.5742, lng: 9.9447,
+    phone: "040 43208844",
+    website: "https://villa-im-park.de",
+    order: 3
   },
   {
     name: "Lim's – Buchholz",
-    lat: 53.3236, lng: 9.8711,
+    icon: "🎸", iconFile: "lims.png",
+    schedule: "3. Freitag im Monat",
     address: "Breite Str. 10, 21244 Buchholz",
-    info: `<strong>Lim's</strong><br>
-           Breite Str. 10, 21244 Buchholz<br>
-           3. Freitag im Monat<br>
-           📞 <a href="tel:04181292011">04181 292011</a><br>
-           🌐 <a href="https://lims-restaurant.de" target="_blank">lims-restaurant.de</a>`
+    lat: 53.3236, lng: 9.8711,
+    phone: "04181 292011",
+    website: "https://lims-restaurant.de",
+    order: 4
   },
   {
     name: "Barmbeker Schachcafé",
-    lat: 53.6004, lng: 10.0388,
+    icon: "♟️", iconFile: "schachcafe.png",
+    schedule: "4. Donnerstag im Monat",
     address: "Rübenkamp 227, 22307 Hamburg",
-    info: `<strong>Barmbeker Schachcafé</strong><br>
-           Rübenkamp 227, 22307 Hamburg<br>
-           4. Donnerstag im Monat<br>
-           📞 <a href="tel:04067106144">040 67106144</a><br>
-           🌐 <a href="https://barmbeker-schachcafe.de" target="_blank">barmbeker-schachcafe.de</a>`
+    lat: 53.6004, lng: 10.0388,
+    phone: "040 67106144",
+    website: "https://barmbeker-schachcafe.de",
+    order: 5
   }
 ];
+
+let LOCATIONS = INITIAL_LOCATIONS.slice();
 
 // Galerie-Platzhalter (Emoji + Beschriftung bis echte Fotos da sind)
 const GALLERY_ITEMS = [
@@ -743,16 +749,319 @@ function updateCardCounts(card, rsvps) {
 
 function renderEvents() {
   const grid = document.getElementById("eventsGrid");
-  grid.innerHTML = EVENTS.map(e => `
+  if (!grid) return;
+
+  // Sortieren nach Datum (ISO oder Free-Text egal: ISO geht alphabetisch sauber)
+  const sorted = (EVENTS || []).slice().sort((a, b) => (a.iso || "").localeCompare(b.iso || ""));
+
+  const adminToolbar = isAdmin
+    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="eventAddBtn">➕ Neues Event</button>${EVENTS.length === 0 ? ' <button class="btn btn--outline" id="eventInitBtn">📥 Initial-Daten laden</button>' : ''}</div>`
+    : "";
+
+  if (!sorted.length && !isAdmin) {
+    grid.innerHTML = `<p class="termine-empty">Aktuell keine besonderen Events geplant.</p>`;
+    return;
+  }
+
+  grid.innerHTML = adminToolbar + sorted.map(e => {
+    const adminBtns = isAdmin && e.id ? `
+      <div class="termin-card__admin">
+        <button type="button" class="card-btn" data-action="edit-event" data-id="${e.id}" title="Bearbeiten">✏️</button>
+        <button type="button" class="card-btn card-btn--danger" data-action="delete-event" data-id="${e.id}" title="Löschen">🗑️</button>
+      </div>` : "";
+    return `
     <article class="event-card">
-      <div class="event-card__img" aria-hidden="true">${e.emoji}</div>
+      ${adminBtns}
+      <div class="event-card__img" aria-hidden="true">${escapeHtml(e.emoji || "🎉")}</div>
       <div class="event-card__body">
-        <p class="event-card__date">${e.date}</p>
-        <h3>${e.title}</h3>
-        <p>${e.desc}</p>
+        <p class="event-card__date">${escapeHtml(e.date)}</p>
+        <h3>${escapeHtml(e.title)}</h3>
+        <p>${escapeHtml(e.desc)}</p>
       </div>
-    </article>
-  `).join("");
+    </article>`;
+  }).join("");
+
+  document.getElementById("eventAddBtn")?.addEventListener("click", () => openEventEditor());
+  document.getElementById("eventInitBtn")?.addEventListener("click", initialMigrateEvents);
+
+  if (!grid.dataset.bound) {
+    grid.dataset.bound = "1";
+    grid.addEventListener("click", ev => {
+      const editBtn = ev.target.closest('[data-action="edit-event"]');
+      if (editBtn) { openEventEditor(editBtn.dataset.id); return; }
+      const delBtn = ev.target.closest('[data-action="delete-event"]');
+      if (delBtn) { deleteEvent(delBtn.dataset.id); return; }
+    });
+  }
+}
+
+// ── Admin: Events CRUD ─────────────────────────────
+
+function subscribeEvents() {
+  if (!db) return;
+  onValue(ref(db, "events"), snapshot => {
+    const data = snapshot.val();
+    if (data && typeof data === "object") {
+      EVENTS = Object.entries(data).map(([id, e]) => ({ id, ...e }));
+    } else {
+      EVENTS = INITIAL_EVENTS.slice();
+    }
+    renderEvents();
+  });
+}
+
+async function initialMigrateEvents() {
+  if (!isAdmin || !db) return;
+  if (!confirm("Initial-Events in Firebase laden? (4 Events werden angelegt)")) return;
+  try {
+    for (const e of INITIAL_EVENTS) {
+      const newRef = push(ref(db, "events"));
+      await set(newRef, { ...e, iso: dateToIso(e.date), createdAt: serverTimestamp() });
+    }
+    alert("Fertig – Events sind jetzt in Firebase und können direkt auf der Website verwaltet werden.");
+  } catch (e) {
+    alert("Fehler beim Hochladen: " + e.message);
+  }
+}
+
+function dateToIso(freeText) {
+  // Versucht "07. Jun 2026" → "2026-06-07" zu parsen
+  const months = { jan:"01", feb:"02", "mär":"03", mar:"03", apr:"04", mai:"05", jun:"06", jul:"07", aug:"08", sep:"09", okt:"10", nov:"11", dez:"12" };
+  const m = String(freeText || "").match(/(\d{1,2})\.\s*([a-zäöü]{3})\.?\s*(\d{4})/i);
+  if (!m) return "";
+  const d = m[1].padStart(2, "0"), mo = months[m[2].toLowerCase()] || "01", y = m[3];
+  return `${y}-${mo}-${d}`;
+}
+
+function isoToFreeText(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric" }).replace(/\.$/, "");
+}
+
+function openEventEditor(id = null) {
+  const modal = document.getElementById("eventModal");
+  if (!modal) return;
+  const form = document.getElementById("eventForm");
+  form.reset();
+  document.getElementById("eventId").value = id || "";
+  document.getElementById("eventModalTitle").textContent = id ? "Event bearbeiten" : "Neues Event";
+
+  if (id) {
+    const e = EVENTS.find(x => x.id === id);
+    if (e) {
+      document.getElementById("eventEmoji").value = e.emoji || "";
+      document.getElementById("eventDate").value  = e.iso || dateToIso(e.date);
+      document.getElementById("eventTitle").value = e.title || "";
+      document.getElementById("eventDesc").value  = e.desc || "";
+    }
+  }
+  modal.classList.add("open");
+}
+
+function closeEventEditor() {
+  document.getElementById("eventModal")?.classList.remove("open");
+}
+
+async function saveEventFromForm(ev) {
+  ev.preventDefault();
+  if (!isAdmin || !db) return;
+  const id    = document.getElementById("eventId").value;
+  const emoji = document.getElementById("eventEmoji").value.trim() || "🎉";
+  const iso   = document.getElementById("eventDate").value;
+  const title = document.getElementById("eventTitle").value.trim();
+  const desc  = document.getElementById("eventDesc").value.trim();
+
+  if (!iso || !title || !desc) { alert("Datum, Titel und Beschreibung sind Pflicht."); return; }
+
+  const data = {
+    emoji, iso, title, desc,
+    date: isoToFreeText(iso),
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    if (id) {
+      await set(ref(db, `events/${id}`), data);
+    } else {
+      const newRef = push(ref(db, "events"));
+      await set(newRef, data);
+    }
+    closeEventEditor();
+  } catch (err) {
+    alert("Speichern fehlgeschlagen: " + err.message);
+  }
+}
+
+async function deleteEvent(id) {
+  if (!isAdmin || !db) return;
+  const e = EVENTS.find(x => x.id === id);
+  if (!confirm(`Event "${e?.title}" wirklich löschen?`)) return;
+  try {
+    await remove(ref(db, `events/${id}`));
+  } catch (err) {
+    alert("Löschen fehlgeschlagen: " + err.message);
+  }
+}
+
+// ── Treffpunkte (Locations) rendern + CRUD ─────────
+
+function renderTreffpunkte() {
+  const grid = document.getElementById("treffpunkteGrid");
+  if (!grid) return;
+
+  const sorted = (LOCATIONS || []).slice().sort((a, b) => (a.order || 99) - (b.order || 99));
+
+  const adminToolbar = isAdmin
+    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="locationAddBtn">➕ Neuer Treffpunkt</button>${LOCATIONS.length === 0 ? ' <button class="btn btn--outline" id="locationInitBtn">📥 Initial-Daten laden</button>' : ''}</div>`
+    : "";
+
+  grid.innerHTML = adminToolbar + sorted.map(l => {
+    const adminBtns = isAdmin && l.id ? `
+      <div class="termin-card__admin">
+        <button type="button" class="card-btn" data-action="edit-location" data-id="${l.id}" title="Bearbeiten">✏️</button>
+        <button type="button" class="card-btn card-btn--danger" data-action="delete-location" data-id="${l.id}" title="Löschen">🗑️</button>
+      </div>` : "";
+    const iconHtml = l.iconFile
+      ? `<img class="gmaps__icon gmaps__icon--img" src="icons/${escapeHtml(l.iconFile)}" alt="${escapeHtml(l.name)} Logo" loading="lazy" onerror="this.style.display='none'" />`
+      : `<span class="gmaps__icon">${escapeHtml(l.icon || "📍")}</span>`;
+    const addrEnc = encodeURIComponent(l.address || l.name);
+    return `
+    <div class="gmaps__card">
+      ${adminBtns}
+      <div class="gmaps__header">
+        ${iconHtml}
+        <div>
+          <p class="gmaps__when">${escapeHtml(l.schedule || "")}</p>
+          <h3>${escapeHtml(l.name)}</h3>
+          <p class="gmaps__address">${escapeHtml(l.address || "")}</p>
+        </div>
+      </div>
+      <div class="gmaps__frame-wrap">
+        <iframe src="https://maps.google.com/maps?q=${addrEnc}&output=embed&z=16"
+          title="Karte ${escapeHtml(l.name)}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <button type="button" class="gmaps__nav-btn"
+        data-address="${escapeHtml(l.address || "")}"
+        data-lat="${l.lat || ""}"
+        data-lng="${l.lng || ""}"
+        data-name="${escapeHtml(l.name)}">🧭 Navigation öffnen</button>
+    </div>`;
+  }).join("");
+
+  document.getElementById("locationAddBtn")?.addEventListener("click", () => openLocationEditor());
+  document.getElementById("locationInitBtn")?.addEventListener("click", initialMigrateLocations);
+
+  if (!grid.dataset.bound) {
+    grid.dataset.bound = "1";
+    grid.addEventListener("click", e => {
+      const editBtn = e.target.closest('[data-action="edit-location"]');
+      if (editBtn) { openLocationEditor(editBtn.dataset.id); return; }
+      const delBtn = e.target.closest('[data-action="delete-location"]');
+      if (delBtn) { deleteLocation(delBtn.dataset.id); return; }
+    });
+  }
+}
+
+function subscribeLocations() {
+  if (!db) return;
+  onValue(ref(db, "locations"), snapshot => {
+    const data = snapshot.val();
+    if (data && typeof data === "object") {
+      LOCATIONS = Object.entries(data).map(([id, l]) => ({ id, ...l }));
+    } else {
+      LOCATIONS = INITIAL_LOCATIONS.slice();
+    }
+    renderTreffpunkte();
+  });
+}
+
+async function initialMigrateLocations() {
+  if (!isAdmin || !db) return;
+  if (!confirm("Initial-Treffpunkte in Firebase laden? (5 Stammtische werden angelegt)")) return;
+  try {
+    for (const l of INITIAL_LOCATIONS) {
+      const newRef = push(ref(db, "locations"));
+      await set(newRef, { ...l, createdAt: serverTimestamp() });
+    }
+    alert("Fertig – Treffpunkte sind jetzt in Firebase und können direkt auf der Website verwaltet werden.");
+  } catch (e) {
+    alert("Fehler beim Hochladen: " + e.message);
+  }
+}
+
+function openLocationEditor(id = null) {
+  const modal = document.getElementById("locationModal");
+  if (!modal) return;
+  const form = document.getElementById("locationForm");
+  form.reset();
+  document.getElementById("locationId").value = id || "";
+  document.getElementById("locationModalTitle").textContent = id ? "Treffpunkt bearbeiten" : "Neuer Treffpunkt";
+
+  if (id) {
+    const l = LOCATIONS.find(x => x.id === id);
+    if (l) {
+      document.getElementById("locationName").value     = l.name || "";
+      document.getElementById("locationSchedule").value = l.schedule || "";
+      document.getElementById("locationAddress").value  = l.address || "";
+      document.getElementById("locationLat").value      = l.lat || "";
+      document.getElementById("locationLng").value      = l.lng || "";
+      document.getElementById("locationIconFile").value = l.iconFile || "";
+      document.getElementById("locationPhone").value    = l.phone || "";
+      document.getElementById("locationWebsite").value  = l.website || "";
+      document.getElementById("locationOrder").value    = l.order || (LOCATIONS.length + 1);
+    }
+  } else {
+    document.getElementById("locationOrder").value = LOCATIONS.length + 1;
+  }
+  modal.classList.add("open");
+}
+
+function closeLocationEditor() {
+  document.getElementById("locationModal")?.classList.remove("open");
+}
+
+async function saveLocationFromForm(e) {
+  e.preventDefault();
+  if (!isAdmin || !db) return;
+  const id = document.getElementById("locationId").value;
+  const data = {
+    name:     document.getElementById("locationName").value.trim(),
+    schedule: document.getElementById("locationSchedule").value.trim(),
+    address:  document.getElementById("locationAddress").value.trim(),
+    lat:      parseFloat(document.getElementById("locationLat").value) || null,
+    lng:      parseFloat(document.getElementById("locationLng").value) || null,
+    iconFile: document.getElementById("locationIconFile").value.trim() || null,
+    phone:    document.getElementById("locationPhone").value.trim() || null,
+    website:  document.getElementById("locationWebsite").value.trim() || null,
+    order:    parseInt(document.getElementById("locationOrder").value, 10) || LOCATIONS.length + 1,
+    createdAt: serverTimestamp()
+  };
+  if (!data.name || !data.address) { alert("Name und Adresse sind Pflicht."); return; }
+
+  try {
+    if (id) {
+      await set(ref(db, `locations/${id}`), data);
+    } else {
+      const newRef = push(ref(db, "locations"));
+      await set(newRef, data);
+    }
+    closeLocationEditor();
+  } catch (err) {
+    alert("Speichern fehlgeschlagen: " + err.message);
+  }
+}
+
+async function deleteLocation(id) {
+  if (!isAdmin || !db) return;
+  const l = LOCATIONS.find(x => x.id === id);
+  if (!confirm(`Treffpunkt "${l?.name}" wirklich löschen?`)) return;
+  try {
+    await remove(ref(db, `locations/${id}`));
+  } catch (err) {
+    alert("Löschen fehlgeschlagen: " + err.message);
+  }
 }
 
 // ── Galerie rendern + Lightbox ──────────────────────
@@ -1194,6 +1503,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initNavModal();
   setupAuthObserver();
   subscribeTermine();
+  subscribeEvents();
+  subscribeLocations();
   initAdminUi();
 });
 
@@ -1235,6 +1546,20 @@ function initAdminUi() {
   document.getElementById("terminCancel")?.addEventListener("click", closeTerminEditor);
   document.getElementById("terminForm")?.addEventListener("submit", saveTerminFromForm);
   tModal?.addEventListener("click", e => { if (e.target === tModal) closeTerminEditor(); });
+
+  // Event-Modal
+  const eModal = document.getElementById("eventModal");
+  document.getElementById("eventClose")?.addEventListener("click", closeEventEditor);
+  document.getElementById("eventCancel")?.addEventListener("click", closeEventEditor);
+  document.getElementById("eventForm")?.addEventListener("submit", saveEventFromForm);
+  eModal?.addEventListener("click", e => { if (e.target === eModal) closeEventEditor(); });
+
+  // Location-Modal
+  const lModal = document.getElementById("locationModal");
+  document.getElementById("locationClose")?.addEventListener("click", closeLocationEditor);
+  document.getElementById("locationCancel")?.addEventListener("click", closeLocationEditor);
+  document.getElementById("locationForm")?.addEventListener("submit", saveLocationFromForm);
+  lModal?.addEventListener("click", e => { if (e.target === lModal) closeLocationEditor(); });
 
   updateAdminFab();
 }
