@@ -45,6 +45,7 @@
         <li><a href="#termine">Termine</a></li>
         <li><a href="#events">Events</a></li>
         <li><a href="#galerie">Galerie</a></li>
+        <li><a href="#lernen">Lernen</a></li>
         <li><a href="#kontakt">Kontakt</a></li>
       </ul>
     </nav>
@@ -59,6 +60,9 @@
       <div class="hero__cta">
         <a href="#termine" class="btn btn--primary">Nächste Termine</a>
         <a href="#treffpunkte" class="btn btn--outline">Treffpunkte ansehen</a>
+      </div>
+      <div class="weather-widget" id="weatherWidget" aria-live="polite">
+        <span class="weather-widget__loading">⛅ Wetter wird geladen …</span>
       </div>
     </div>
     <div class="hero__wave">
@@ -139,6 +143,45 @@
           📸 @dgs_stammtisch_hhu auf Instagram folgen
         </a>
       </p>
+    </div>
+  </section>
+
+  <!-- ===== LERNEN & SPIELEN ===== -->
+  <section class="section section--alt" id="lernen">
+    <div class="container">
+      <h2 class="section__title">🤟 <span class="accent">Lernen &amp; Spielen</span></h2>
+      <p class="section__sub">Tägliches Gebärdenwort, Mini-Spiele und Empfehlungen zum Selbstlernen.</p>
+
+      <!-- DGS-Wort des Tages -->
+      <article class="word-of-day" id="wordOfDay">
+        <div class="word-of-day__hd">
+          <span class="word-of-day__label">DGS-Wort des Tages</span>
+          <time class="word-of-day__date" id="wordOfDayDate"></time>
+        </div>
+        <h3 class="word-of-day__word" id="wordOfDayWord">…</h3>
+        <p class="word-of-day__hint" id="wordOfDayHint">Zeigt die Gebärde im Wörterbuch.</p>
+        <a class="btn btn--primary word-of-day__btn" id="wordOfDayLink" href="#" target="_blank" rel="noopener">🎥 Gebärde ansehen</a>
+      </article>
+
+      <!-- Memory Spiel -->
+      <article class="memory-widget">
+        <div class="memory-widget__hd">
+          <h3>🎮 DGS-Memory</h3>
+          <div class="memory-widget__stats">
+            <span>Züge: <strong id="memoryMoves">0</strong></span>
+            <span>Zeit: <strong id="memoryTime">0:00</strong></span>
+            <button type="button" class="btn btn--outline memory-widget__reset" id="memoryReset">🔄 Neu starten</button>
+          </div>
+        </div>
+        <div class="memory-board" id="memoryBoard"></div>
+        <p class="memory-widget__win" id="memoryWin" hidden>🎉 Geschafft! Möchtest du nochmal spielen?</p>
+      </article>
+
+      <!-- Lern-Empfehlungen -->
+      <article class="recos-widget">
+        <h3>📚 Empfehlungen zum DGS-Lernen</h3>
+        <div class="recos-grid" id="recosGrid"></div>
+      </article>
     </div>
   </section>
 
@@ -442,6 +485,7 @@
         <a href="#termine">Termine</a>
         <a href="#events">Events</a>
         <a href="#galerie">Galerie</a>
+        <a href="#lernen">Lernen</a>
         <a href="#kontakt">Kontakt</a>
       </nav>
       <p class="footer__copy">© 2026 · Mit 👋 gemacht vom Admin-Team</p>
