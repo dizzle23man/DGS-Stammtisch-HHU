@@ -35,7 +35,7 @@ try {
 }
 
 // ── Admin-Auth ──────────────────────────────────────
-const ADMIN_EMAIL = "admin@dgs-stammtisch-hamburg.de"; // ← falls du eine andere Mail genommen hast, hier anpassen
+const ADMIN_EMAIL = "admin@dgs-stammtisch-hhu.de"; // ← falls du eine andere Mail genommen hast, hier anpassen
 let isAdmin = false;
 
 function setupAuthObserver() {
