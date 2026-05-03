@@ -677,6 +677,65 @@ a:hover { text-decoration: underline; }
   margin: 0 0 .85rem;
   background: var(--bg-alt);
 }
+img.news-card__media {
+  cursor: zoom-in;
+  transition: transform var(--transition);
+}
+img.news-card__media:hover { transform: scale(1.01); }
+
+/* Bild-Lightbox (Click-to-Zoom) */
+.img-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  cursor: zoom-out;
+  animation: lightboxFade .2s ease;
+}
+.img-lightbox.open { display: flex; }
+@keyframes lightboxFade {
+  from { background: rgba(0,0,0,0); }
+  to   { background: rgba(0,0,0,0.92); }
+}
+.img-lightbox__img {
+  max-width: 95vw;
+  max-height: 92vh;
+  object-fit: contain;
+  border-radius: .5rem;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.55);
+  background: #000;
+  cursor: default;
+}
+.img-lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background var(--transition), transform var(--transition);
+  /* Tap-Reach auf Mobile */
+  top: calc(env(safe-area-inset-top) + 1rem);
+  right: calc(env(safe-area-inset-right) + 1rem);
+}
+.img-lightbox__close:hover {
+  background: rgba(255,255,255,0.22);
+  transform: scale(1.05);
+}
 .news-card__body a {
   color: var(--primary);
   font-weight: 600;

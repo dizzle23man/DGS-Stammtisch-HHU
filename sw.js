@@ -2,7 +2,7 @@
    DGS Stammtisch Hamburg – Service Worker
    =================================================== */
 
-const CACHE_NAME = 'dgs-hh-v20';
+const CACHE_NAME = 'dgs-hh-v21';
 
 const PRECACHE = [
   './',

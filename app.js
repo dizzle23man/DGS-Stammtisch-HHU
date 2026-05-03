@@ -1501,12 +1501,52 @@ document.addEventListener("DOMContentLoaded", () => {
   initPWA();
   initRsvpSubscription();
   initNavModal();
+  initImageLightbox();
   setupAuthObserver();
   subscribeTermine();
   subscribeEvents();
   subscribeLocations();
   initAdminUi();
 });
+
+// ── Bild-Lightbox (Click-to-Zoom für Telegram-Bilder) ─
+
+function initImageLightbox() {
+  const lb     = document.getElementById("imgLightbox");
+  const lbImg  = document.getElementById("imgLightboxImg");
+  const lbClose= document.getElementById("imgLightboxClose");
+  if (!lb || !lbImg) return;
+
+  function open(src, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || "";
+    lb.classList.add("open");
+    document.body.style.overflow = "hidden"; // Scroll sperren
+  }
+  function close() {
+    lb.classList.remove("open");
+    lbImg.src = "";
+    document.body.style.overflow = "";
+  }
+
+  // Klicks auf Telegram-Bilder per Event-Delegation
+  document.addEventListener("click", e => {
+    const media = e.target.closest("img.news-card__media");
+    if (media) {
+      e.preventDefault();
+      e.stopPropagation();
+      open(media.src, media.alt);
+      return;
+    }
+    if (e.target === lb || e.target === lbClose || e.target.closest(".img-lightbox__close")) {
+      close();
+    }
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && lb.classList.contains("open")) close();
+  });
+}
 
 // ── Admin-UI (Login + Termin-Editor) ─────────────────
 
