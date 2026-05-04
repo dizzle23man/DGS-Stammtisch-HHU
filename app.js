@@ -36,12 +36,13 @@ try {
 
 // ── Admin-Auth ──────────────────────────────────────
 const ADMIN_EMAIL = "admin@dgs-stammtisch-hhu.de"; // ← falls du eine andere Mail genommen hast, hier anpassen
+const ADMIN_EMAIL_LC = ADMIN_EMAIL.toLowerCase();
 let isAdmin = false;
 
 function setupAuthObserver() {
   if (!auth) return;
   onAuthStateChanged(auth, user => {
-    isAdmin = !!user;
+    isAdmin = !!user && (user.email || "").toLowerCase() === ADMIN_EMAIL_LC;
     document.body.classList.toggle("is-admin", isAdmin);
     updateAdminFab();
     // Alles neu rendern, damit Admin-Buttons erscheinen/verschwinden

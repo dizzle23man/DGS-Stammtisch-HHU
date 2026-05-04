@@ -1115,7 +1115,7 @@ img.news-card__media:hover { transform: scale(1.01); }
 /* ===== GOOGLE MAPS ÜBERSICHT ===== */
 .gmaps__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 2rem;
 }
 .gmaps__card {
