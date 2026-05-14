@@ -35,7 +35,7 @@ try {
 }
 
 // ── Admin-Auth ──────────────────────────────────────
-const ADMIN_EMAIL = "admin@dgs-stammtisch-hhu.de"; // ← falls du eine andere Mail genommen hast, hier anpassen
+const ADMIN_EMAIL = "dgs.stammtisch_hhu@proton.me"; // ← falls du eine andere Mail genommen hast, hier anpassen
 const ADMIN_EMAIL_LC = ADMIN_EMAIL.toLowerCase();
 let isAdmin = false;
 
@@ -941,7 +941,8 @@ function renderTreffpunkte() {
         </div>
       </div>
       <div class="gmaps__frame-wrap">
-        <iframe src="https://maps.google.com/maps?q=${addrEnc}&output=embed&z=16"
+        <iframe data-src="https://maps.google.com/maps?q=${addrEnc}&output=embed&z=16"
+          data-name="googlemaps"
           title="Karte ${escapeHtml(l.name)}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
       <button type="button" class="gmaps__nav-btn"

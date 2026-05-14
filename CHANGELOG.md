@@ -4,6 +4,30 @@
 
 ---
 
+## 🎉 v4.2 — „Rechtssicher-Update"
+> 🛡️ **DSGVO-Konformität + Impressum + Consent-Banner**
+
+### 🆕 New Features
+- **📜 Impressum-Seite** (`impressum.html`) — Pflicht nach §5 DDG, Privatperson als Verantwortlicher
+- **🔐 Datenschutzerklärung** (`datenschutz.html`) — alle Drittanbieter (Firebase, Google Maps, Cloudflare, Behold, Telegram, Open-Meteo) ordentlich aufgeführt
+- **🍪 Klaro Consent-Manager** — Cookie-Banner unten, Nutzer entscheidet selbst über externe Inhalte
+  - Google Maps lädt erst nach Zustimmung
+  - Instagram-Feed (Behold) lädt erst nach Zustimmung
+- **Footer-Erweiterung** — Links auf Impressum, Datenschutz, Cookie-Einstellungen
+
+### 🛠️ Improvements
+- **Admin-E-Mail** geändert: `admin@dgs-stammtisch-hhu.de` → `dgs.stammtisch_hhu@proton.me` (echte Proton-Mail)
+- **Kontakt-E-Mail** auf der Website ebenfalls auf Proton-Adresse aktualisiert
+- **Google-Maps-Iframes** nutzen `data-src` statt `src` (Klaro-kompatibel)
+- **Behold-Widget** als Klaro-Service registriert
+
+### 📝 To-Do für den Vereins-Admin
+- [ ] In `impressum.html` Platzhalter mit deinen echten Daten füllen (e-recht24.de-Generator)
+- [ ] In `datenschutz.html` Datum + ggf. Anpassungen ergänzen
+- [ ] AVVs bei Google Cloud + Cloudflare „akzeptieren" (1 Klick)
+
+---
+
 ## 🎉 v4.1 — „Fort Knox Edition"
 > 🔒 **Security-Patch + Polish**
 

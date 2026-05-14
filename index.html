@@ -20,6 +20,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Klaro Consent-Manager -->
+  <link rel="stylesheet" href="https://cdn.kiprotect.com/klaro/v0.7.22/klaro.min.css" />
+  <script defer src="klaro-config.js"></script>
+  <script defer src="https://cdn.kiprotect.com/klaro/v0.7.22/klaro.js"></script>
 </head>
 <body>
 
@@ -133,8 +138,8 @@
       <h2 class="section__title">📸 <span class="accent">Galerie</span></h2>
       <p class="section__sub">Eindrücke aus unseren Treffen – live aus unserem Instagram-Account.</p>
 
-      <!-- Behold Instagram-Feed -->
-      <div class="insta-feed">
+      <!-- Behold Instagram-Feed (nur nach Klaro-Consent) -->
+      <div class="insta-feed" data-name="instagram">
         <behold-widget feed-id="PxJ1KEgwPTyYv1iGj1pX"></behold-widget>
       </div>
 
@@ -210,7 +215,7 @@
         </div>
 
         <ul class="kontakt__list">
-          <li>📧 <a href="mailto:info@dgs-stammtisch-hamburg.de">info@dgs-stammtisch-hamburg.de</a></li>
+          <li>📧 <a href="mailto:dgs.stammtisch_hhu@proton.me">dgs.stammtisch_hhu@proton.me</a></li>
           <li>📸 Instagram: <a href="https://www.instagram.com/dgs_stammtisch_hhu/" target="_blank" rel="noopener noreferrer">@dgs_stammtisch_hhu</a></li>
         </ul>
 
@@ -488,12 +493,17 @@
         <a href="#lernen">Lernen</a>
         <a href="#kontakt">Kontakt</a>
       </nav>
+      <nav class="footer__legal" aria-label="Rechtliches">
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="#" id="openConsentManager">Cookie-Einstellungen</a>
+      </nav>
       <p class="footer__copy">© 2026 · Mit 👋 gemacht vom Admin-Team</p>
     </div>
   </footer>
 
-  <!-- Behold Instagram-Widget Loader -->
-  <script>
+  <!-- Behold Instagram-Widget Loader (nur nach Klaro-Consent) -->
+  <script type="text/plain" data-type="application/javascript" data-name="instagram">
     (() => {
       const d = document, s = d.createElement("script");
       s.type = "module";
