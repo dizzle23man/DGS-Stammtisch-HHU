@@ -987,30 +987,60 @@ function subscribeLocations() {
 // Damit Google Maps & Co. auch nach einem Reload automatisch laden,
 // sobald der Nutzer einmal zugestimmt hat.
 function readKlaroConsents() {
+  // 1) Versuche Klaros eigene API
+  try {
+    const mgr = window.klaro?.getManager?.();
+    if (mgr?.consents && typeof mgr.consents === "object") return mgr.consents;
+    if (mgr?.loadConsents) {
+      const c = mgr.loadConsents();
+      if (c) return c;
+    }
+  } catch {}
+  // 2) Versuche das Cookie
   try {
     const m = document.cookie.match(/(?:^|;\s*)dgs-klaro=([^;]+)/);
-    if (!m) return {};
-    return JSON.parse(decodeURIComponent(m[1])) || {};
-  } catch { return {}; }
+    if (m) {
+      const parsed = JSON.parse(decodeURIComponent(m[1]));
+      if (parsed && typeof parsed === "object") return parsed;
+    }
+  } catch {}
+  // 3) Versuche localStorage (Klaro nutzt das manchmal als Backup)
+  try {
+    const stored = localStorage.getItem("dgs-klaro") || localStorage.getItem("klaro");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === "object") return parsed;
+    }
+  } catch {}
+  return {};
 }
+
 function activateConsentedEmbeds() {
   const consents = readKlaroConsents();
-  document.querySelectorAll("iframe[data-name][data-src]").forEach(iframe => {
+  let activated = 0, blocked = 0;
+  document.querySelectorAll("iframe[data-name]").forEach(iframe => {
     const name = iframe.dataset.name;
-    if (consents[name] === true) {
-      if (!iframe.src || iframe.src === "about:blank") {
-        iframe.src = iframe.dataset.src;
-      }
-    } else {
-      // Consent zurückgezogen → iframe leeren
-      if (iframe.src && iframe.src !== "about:blank") {
+    const dataSrc = iframe.dataset.src;
+    const allowed = !!consents[name]; // truthy: true, "true", 1 …
+    if (allowed && dataSrc) {
+      // Iframe aktivieren (auch wenn Klaro es noch nicht selbst gemacht hat)
+      if (iframe.src !== dataSrc) iframe.src = dataSrc;
+      activated++;
+    } else if (!allowed) {
+      // Consent fehlt oder zurückgezogen
+      if (iframe.src && iframe.src !== "about:blank" && dataSrc) {
         iframe.removeAttribute("src");
+        blocked++;
       }
     }
   });
-  // Falls Klaro inzwischen geladen ist: auch seine Apply-Methode triggern
-  try { window.klaro?.getManager?.()?.applyConsents?.(); } catch {}
+  if (activated || blocked) {
+    console.log(`[Klaro] Iframes aktiviert: ${activated}, blockiert: ${blocked}`, consents);
+  }
 }
+
+// Klaro-Apply auch von außen triggerbar (für inline-onclick)
+window.activateConsentedEmbeds = activateConsentedEmbeds;
 
 async function initialMigrateLocations() {
   if (!isAdmin || !db) return;
@@ -1542,6 +1572,10 @@ document.addEventListener("DOMContentLoaded", () => {
   subscribeEvents();
   subscribeLocations();
   initAdminUi();
+  // Klaro-Consent mehrmals anwenden – falls Klaro erst spät lädt
+  setTimeout(activateConsentedEmbeds, 300);
+  setTimeout(activateConsentedEmbeds, 1500);
+  setTimeout(activateConsentedEmbeds, 4000);
   // Neue Widgets:
   loadWeather();
   renderWordOfDay();

@@ -2,7 +2,7 @@
    DGS Stammtisch Hamburg – Service Worker
    =================================================== */
 
-const CACHE_NAME = 'dgs-hh-v30';
+const CACHE_NAME = 'dgs-hh-v31';
 
 const PRECACHE = [
   './',
@@ -40,6 +40,9 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+
+  // 0) Nur http/https cachen — chrome-extension://, devtools:// etc. ignorieren
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
   // 1) Google Maps / OSM-Tiles / Firebase: immer Netz, kein Cache
   if (
