@@ -85,3 +85,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Wenn Klaro Consents speichert: dynamische Inhalte sofort aktivieren
+window.addEventListener('click', e => {
+  if (e.target.closest('.klaro .cm-btn, .klaro .cookie-modal button, .klaro .cookie-notice button')) {
+    setTimeout(() => {
+      if (typeof activateConsentedEmbeds === 'function') activateConsentedEmbeds();
+    }, 100);
+  }
+});
