@@ -965,6 +965,9 @@ function renderTreffpunkte() {
       if (delBtn) { deleteLocation(delBtn.dataset.id); return; }
     });
   }
+
+  // Klaro-Consent nachträglich auf die frisch gerenderten Iframes anwenden
+  setTimeout(activateConsentedEmbeds, 50);
 }
 
 function subscribeLocations() {
@@ -978,6 +981,35 @@ function subscribeLocations() {
     }
     renderTreffpunkte();
   });
+}
+
+// ── Klaro: Nach dynamischem Render Consents nachträglich anwenden ──
+// Damit Google Maps & Co. auch nach einem Reload automatisch laden,
+// sobald der Nutzer einmal zugestimmt hat.
+function readKlaroConsents() {
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)dgs-klaro=([^;]+)/);
+    if (!m) return {};
+    return JSON.parse(decodeURIComponent(m[1])) || {};
+  } catch { return {}; }
+}
+function activateConsentedEmbeds() {
+  const consents = readKlaroConsents();
+  document.querySelectorAll("iframe[data-name][data-src]").forEach(iframe => {
+    const name = iframe.dataset.name;
+    if (consents[name] === true) {
+      if (!iframe.src || iframe.src === "about:blank") {
+        iframe.src = iframe.dataset.src;
+      }
+    } else {
+      // Consent zurückgezogen → iframe leeren
+      if (iframe.src && iframe.src !== "about:blank") {
+        iframe.removeAttribute("src");
+      }
+    }
+  });
+  // Falls Klaro inzwischen geladen ist: auch seine Apply-Methode triggern
+  try { window.klaro?.getManager?.()?.applyConsents?.(); } catch {}
 }
 
 async function initialMigrateLocations() {

@@ -112,6 +112,53 @@ a:hover { text-decoration: underline; }
   transform: translateY(-2px);
 }
 
+/* ===== UNDER-CONSTRUCTION BANNER ===== */
+.under-construction {
+  position: relative;
+  background: #fbbf24;
+  color: #111;
+  padding: .7rem 1rem;
+  font-size: .92rem;
+  font-weight: 800;
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 4px solid #111;
+  z-index: 90;
+  letter-spacing: .01em;
+}
+.under-construction::before,
+.under-construction::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 70px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #fbbf24 0,
+    #fbbf24 10px,
+    #111 10px,
+    #111 20px
+  );
+  pointer-events: none;
+}
+.under-construction::before { left: 0; }
+.under-construction::after  { right: 0; }
+.under-construction__text {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  padding: 0 .5rem;
+  background: #fbbf24;
+  max-width: calc(100% - 160px);
+}
+@media (max-width: 600px) {
+  .under-construction { font-size: .82rem; padding: .55rem .25rem; }
+  .under-construction::before,
+  .under-construction::after { width: 28px; }
+  .under-construction__text { max-width: calc(100% - 72px); }
+}
+
 /* ===== HEADER / NAV ===== */
 .header {
   position: sticky;
