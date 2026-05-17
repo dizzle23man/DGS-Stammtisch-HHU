@@ -1,0 +1,9 @@
+# DGS Stammtisch HHU – Crawler-Konfiguration
+# ────────────────────────────────────────────────
+# Aktueller Status: NICHT öffentlich indexieren (Soft-Launch-Phase)
+#
+# Wenn ihr offiziell live gehen wollt: diese Datei löschen
+# ODER alle Disallow-Zeilen durch "Allow: /" ersetzen.
+
+User-agent: *
+Disallow: /
