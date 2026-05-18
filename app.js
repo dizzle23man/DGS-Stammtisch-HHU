@@ -167,28 +167,20 @@ let TERMINE = INITIAL_TERMINE.slice();
 
 const INITIAL_EVENTS = [
   {
-    emoji: "🎬",
-    date: "24. Mai 2026",
-    title: "DGS-Filmabend",
-    desc: "Wir schauen gemeinsam einen Film mit DGS-Dolmetscher und besprechen ihn anschließend. Für alle Levels!"
+    emoji: "📜",
+    date: "20. Mai 2026",
+    iso: "2026-05-20",
+    title: "Vortrag: Der Schwerbehindertenausweis",
+    desc: "Welche Voraussetzungen gibt es, wie läuft die Beantragung ab und welche Nachteilsausgleiche und Unterstützungsangebote sind damit verbunden? In diesem Vortrag erhaltet ihr einen kompakten Überblick über die wichtigsten Informationen rund um den Schwerbehindertenausweis sowie Raum für Fragen und Austausch.\n\n🎤 Referent: Jörg Winkler (HörBiz)\n🕕 18:00 – 19:30 Uhr\n📍 Saal im BdS, Wagnerstraße 42",
+    image: "icons/events/event-schwerbehindertenausweis.jpg"
   },
   {
-    emoji: "📚",
-    date: "07. Jun 2026",
-    title: "DGS-Workshop für Anfänger",
-    desc: "Zwei Stunden Grundlagen der Deutschen Gebärdensprache – kostenlos, offen für alle."
-  },
-  {
-    emoji: "🚂",
-    date: "21. Jun 2026",
-    title: "Ausflug Alsterpark",
-    desc: "Gemeinsamer Spaziergang und Picknick im Alsterpark. Anmeldung bis 14. Jun per E-Mail."
-  },
-  {
-    emoji: "🎭",
-    date: "12. Jul 2026",
-    title: "Theater in DGS",
-    desc: "Aufführung der Theatergruppe 'Hands & Faces'. Mit Simultanübersetzung in Lautsprache."
+    emoji: "🎆",
+    date: "29. Mai 2026",
+    iso: "2026-05-29",
+    title: "Kirschblütenfest – Picknick & Feuerwerk",
+    desc: "Treffpunkt um 20:00 Uhr auf der Alsterwiese Schwanenwik. Feuerwerk zum Kirschblütenfest startet um 22:30 Uhr. Bringt eigene Getränke und Snacks mit – wir veranstalten ein gemeinsames Picknick!",
+    image: "icons/events/event-kirschbluete.jpg"
   }
 ];
 
@@ -771,14 +763,17 @@ function renderEvents() {
         <button type="button" class="card-btn" data-action="edit-event" data-id="${e.id}" title="Bearbeiten">✏️</button>
         <button type="button" class="card-btn card-btn--danger" data-action="delete-event" data-id="${e.id}" title="Löschen">🗑️</button>
       </div>` : "";
+    const media = e.image
+      ? `<img class="event-card__img-real" src="${escapeHtml(e.image)}" alt="${escapeHtml(e.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'event-card__img\\'>${escapeHtml(e.emoji || "🎉").replace(/'/g,"")}</div>';" />`
+      : `<div class="event-card__img" aria-hidden="true">${escapeHtml(e.emoji || "🎉")}</div>`;
     return `
     <article class="event-card">
       ${adminBtns}
-      <div class="event-card__img" aria-hidden="true">${escapeHtml(e.emoji || "🎉")}</div>
+      ${media}
       <div class="event-card__body">
         <p class="event-card__date">${escapeHtml(e.date)}</p>
         <h3>${escapeHtml(e.title)}</h3>
-        <p>${escapeHtml(e.desc)}</p>
+        <p>${escapeHtml(e.desc).replace(/\n/g, "<br>")}</p>
       </div>
     </article>`;
   }).join("");
@@ -857,6 +852,8 @@ function openEventEditor(id = null) {
       document.getElementById("eventDate").value  = e.iso || dateToIso(e.date);
       document.getElementById("eventTitle").value = e.title || "";
       document.getElementById("eventDesc").value  = e.desc || "";
+      const imgEl = document.getElementById("eventImage");
+      if (imgEl) imgEl.value = e.image || "";
     }
   }
   modal.classList.add("open");
@@ -877,9 +874,11 @@ async function saveEventFromForm(ev) {
 
   if (!iso || !title || !desc) { alert("Datum, Titel und Beschreibung sind Pflicht."); return; }
 
+  const image = document.getElementById("eventImage")?.value.trim() || null;
   const data = {
     emoji, iso, title, desc,
     date: isoToFreeText(iso),
+    image,
     createdAt: serverTimestamp()
   };
 
@@ -1655,6 +1654,28 @@ function initTabs() {
     const h = window.location.hash.slice(1);
     if (h) show(h);
   });
+
+  // Scroll-Hinweis für Tabs (Mobile)
+  initTabsScrollHint();
+}
+
+function initTabsScrollHint() {
+  const tabsEl = document.querySelector("#mainTabs");
+  const hint   = document.getElementById("tabsScrollHint");
+  if (!tabsEl || !hint) return;
+
+  function update() {
+    const atEnd = tabsEl.scrollLeft + tabsEl.clientWidth >= tabsEl.scrollWidth - 8;
+    const scrollable = tabsEl.scrollWidth > tabsEl.clientWidth + 8;
+    hint.classList.toggle("hidden", !scrollable || atEnd);
+  }
+  tabsEl.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  hint.addEventListener("click", () => {
+    tabsEl.scrollBy({ left: 200, behavior: "smooth" });
+  });
+  setTimeout(update, 100);
+  setTimeout(update, 800);
 }
 
 // ── Karte: Übersicht mit allen Treffpunkten (Leaflet) ──
@@ -1891,14 +1912,14 @@ function flipCard(card) {
 // ── 📚 DGS-Lern-Empfehlungen ───────────────────────
 
 const RECOS = [
-  { emoji:"📖", title:"SignDict",        desc:"Offenes DGS-Wörterbuch von der Community.",        url:"https://signdict.org/de" },
-  { emoji:"🌍", title:"Spreadthesign",   desc:"Internationale Gebärdensprach-Datenbank.",          url:"https://www.spreadthesign.com/de.de/search/" },
-  { emoji:"🎓", title:"DGS-Korpus Uni HH",desc:"Wissenschaftliches DGS-Wörterbuch der Uni Hamburg.",url:"https://www.sign-lang.uni-hamburg.de/dgs-korpus/" },
-  { emoji:"📺", title:"YouTube: Manimundo",desc:"DGS-Lernvideos für Anfänger und Fortgeschrittene.", url:"https://www.youtube.com/@manimundogmbh6507" },
-  { emoji:"📱", title:"App: GebärdenSchatz",desc:"Gebärden lernen unterwegs (iOS/Android).",       url:"https://www.gebaerdenschatz.de" },
-  { emoji:"🏫", title:"VHS DGS-Kurse",   desc:"DGS-Kurse an der Volkshochschule Hamburg.",         url:"https://www.vhs-hamburg.de/" },
-  { emoji:"🤝", title:"Gehörlosenverband HH",desc:"Hamburgs Gehörlosenverband – Beratung und Events.",url:"https://www.glvhh.de" },
-  { emoji:"📚", title:"DGS-Kinderbuch-Verlag",desc:"Bücher & Lernmaterial mit DGS für Familien.",  url:"https://gebaerdenstube.de/" }
+  { emoji:"📖", title:"SignDict",            desc:"Offenes DGS-Wörterbuch von der Community.",                            url:"https://signdict.org/" },
+  { emoji:"🌍", title:"Spreadthesign",       desc:"Internationale Gebärdensprach-Datenbank.",                              url:"https://www.spreadthesign.com/de.de/search/" },
+  { emoji:"🎓", title:"DGS-Korpus Uni HH",   desc:"Wissenschaftliches DGS-Wörterbuch der Uni Hamburg.",                    url:"https://www.sign-lang.uni-hamburg.de/dgs-korpus/" },
+  { emoji:"📺", title:"YouTube: Heiko Burak",desc:"DGS-Lernvideos auf YouTube für alle Levels.",                          url:"https://www.youtube.com/@HeikoBurak" },
+  { emoji:"📱", title:"App: AnySign",        desc:"Gebärden lernen unterwegs – moderne App für iOS & Android.",            url:"https://www.anysign.app/de" },
+  { emoji:"🏫", title:"VHS Hamburg",         desc:"DGS-Kurse an der Volkshochschule Hamburg – direkt zur Angebotsliste.", url:"https://www.vhs-hamburg.de/suche?q=Geb%C3%A4rdensprache" },
+  { emoji:"🤝", title:"Gehörlosenverband HH",desc:"Hamburgs Gehörlosenverband – Beratung und Events.",                    url:"https://www.glvhh.de" },
+  { emoji:"📺", title:"KiKA in Gebärdensprache",desc:"Kinderserien mit DGS – super geeignet auch für Erwachsene zum Lernen.",url:"https://www.kika.de/gebaerdensprache/videos-mit-gebaerdensprache-102" }
 ];
 function renderRecos() {
   const grid = document.getElementById("recosGrid");

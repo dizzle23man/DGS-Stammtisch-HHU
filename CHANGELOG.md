@@ -4,6 +4,30 @@
 
 ---
 
+## 🎉 v4.6 — „Mobile-Feinschliff & echte Events"
+> 📱 Tab-Scroll-Hinweis · 🎉 Erste echten Events · 🔗 Bessere Lern-Links
+
+### 🆕 New Features
+- **📱 Tab-Scroll-Hinweis** auf Mobile: animierter Pfeil rechts mit Fade-Gradient zeigt, dass es noch mehr Tabs gibt
+- **🖼️ Events mit Bild** — Event-Karten können jetzt ein echtes Bild statt nur Emoji zeigen (Admin-Form um Bild-Pfad erweitert)
+- **2 echte Events** statt Platzhalter:
+  - 📜 **Vortrag „Der Schwerbehindertenausweis"** – 20. Mai, Saal im BdS, Referent Jörg Winkler
+  - 🎆 **Kirschblütenfest mit Picknick & Feuerwerk** – 29. Mai, Alsterwiese Schwanenwik
+
+### 🛠️ Improvements
+- **🍔 Burger-Menü komplett entfernt** (war nur dekorativ ohne Funktion)
+- **Footer aufgeräumt**: Nur noch Impressum · Datenschutz · Cookie-Einstellungen · Kontakt — alles links-bündig mit Logo
+- **Tabs-Scroll-Snap** auf Mobile (snappt zur nächsten Tab-Position)
+
+### 🔗 Lern-Empfehlungen aktualisiert
+- ✅ **SignDict** Link korrigiert (`/de`-Suffix entfernt, war 404)
+- ✅ **YouTube** geändert: Manimundo → **Heiko Burak**
+- ✅ **App** geändert: GebärdenSchatz (gab's nicht) → **AnySign**
+- ✅ **VHS Hamburg** Direktsuche statt Startseite
+- ✅ **KiKA in Gebärdensprache** statt Kinderbuch-Verlag (für Kinder UND Erwachsene)
+
+---
+
 ## 🎉 v4.5 — „Aufgeräumter Strukturumbau"
 > 🧹 Doppelte Menüs raus · 🎮 Memory funktioniert endlich · 📜 OSM-Datenschutz
 

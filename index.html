@@ -53,9 +53,6 @@
           <span class="theme-toggle__icon theme-toggle__icon--dark"  aria-hidden="true">🌙</span>
         </button>
         <!-- Burger entfernt: Tab-Bar dient als Navigation -->
-        <button class="nav__burger" id="burger" aria-label="Menü öffnen" aria-expanded="false" hidden>
-          <span></span><span></span><span></span>
-        </button>
       </div>
       <!-- Top-Navigation entfernt - Tab-Bar unten reicht aus -->
       <ul class="nav__links" id="navLinks" hidden></ul>
@@ -80,14 +77,17 @@
   </section>
 
   <!-- ===== TAB-NAVIGATION ===== -->
-  <nav class="tabs" id="mainTabs" aria-label="Hauptbereiche">
-    <button type="button" class="tab" data-tab="treffpunkte">📍 <span>Treffpunkte</span></button>
-    <button type="button" class="tab" data-tab="termine">📅 <span>Termine</span></button>
-    <button type="button" class="tab" data-tab="events">🎉 <span>Events</span></button>
-    <button type="button" class="tab" data-tab="galerie">📸 <span>Galerie</span></button>
-    <button type="button" class="tab" data-tab="lernen">🎓 <span>Lernen</span></button>
-    <button type="button" class="tab" data-tab="kontakt">📧 <span>Kontakt</span></button>
-  </nav>
+  <div class="tabs-wrap">
+    <nav class="tabs" id="mainTabs" aria-label="Hauptbereiche">
+      <button type="button" class="tab" data-tab="treffpunkte">📍 <span>Treffpunkte</span></button>
+      <button type="button" class="tab" data-tab="termine">📅 <span>Termine</span></button>
+      <button type="button" class="tab" data-tab="events">🎉 <span>Events</span></button>
+      <button type="button" class="tab" data-tab="galerie">📸 <span>Galerie</span></button>
+      <button type="button" class="tab" data-tab="lernen">🎓 <span>Lernen</span></button>
+      <button type="button" class="tab" data-tab="kontakt">📧 <span>Kontakt</span></button>
+    </nav>
+    <button type="button" class="tabs-scroll-hint" id="tabsScrollHint" aria-label="Mehr Tabs nach rechts">›</button>
+  </div>
 
   <!-- ===== TAB: TREFFPUNKTE (große Karte mit allen Pins) ===== -->
   <div class="tab-panel" data-tab-panel="treffpunkte" id="treffpunkte">
@@ -399,8 +399,12 @@
           <input type="text" id="eventTitle" class="admin-input" placeholder="z.B. DGS-Filmabend" required />
         </label>
         <label class="admin-label">Beschreibung
-          <textarea id="eventDesc" class="admin-input" rows="4" placeholder="Was passiert beim Event?" required></textarea>
+          <textarea id="eventDesc" class="admin-input" rows="5" placeholder="Was passiert beim Event?" required></textarea>
         </label>
+        <label class="admin-label">Bild-Pfad (optional)
+          <input type="text" id="eventImage" class="admin-input" placeholder="z.B. icons/events/event-mai.jpg" />
+        </label>
+        <p class="admin-modal__hint">💡 Bild zuerst in den <code>icons/events/</code>-Ordner laden, dann hier den Pfad eintragen. Wenn leer → Emoji wird gezeigt.</p>
         <div class="admin-modal__actions">
           <button type="button" class="btn btn--outline" id="eventCancel">Abbrechen</button>
           <button type="submit" class="btn btn--primary">💾 Speichern</button>
@@ -522,19 +526,11 @@
           <span class="footer__sub">Hamburg &amp; Umgebung</span>
         </div>
       </div>
-      <nav aria-label="Footer-Navigation">
-        <a href="#aktuelles">Aktuelles</a>
-        <a href="#treffpunkte">Treffpunkte</a>
-        <a href="#termine">Termine</a>
-        <a href="#events">Events</a>
-        <a href="#galerie">Galerie</a>
-        <a href="#lernen">Lernen</a>
-        <a href="#kontakt">Kontakt</a>
-      </nav>
       <nav class="footer__legal" aria-label="Rechtliches">
         <a href="impressum.html">Impressum</a>
         <a href="datenschutz.html">Datenschutz</a>
         <a href="#" id="openConsentManager">Cookie-Einstellungen</a>
+        <a href="#kontakt" data-tab-link="kontakt">Kontakt</a>
       </nav>
       <p class="footer__copy">© 2026 · Mit 👋 gemacht vom Admin-Team</p>
     </div>
