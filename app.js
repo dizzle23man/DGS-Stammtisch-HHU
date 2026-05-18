@@ -112,7 +112,7 @@ const INITIAL_TERMINE = [
     tag: "Monatlich"
   },
   {
-    day: "15", month: "Mai", year: 2026,
+    day: "22", month: "Mai", year: 2026,
     title: "Lim's – Buchholz",
     info: "3. Freitag im Monat",
     ort: "Lim's, Buchholz",
@@ -910,8 +910,9 @@ async function deleteEvent(id) {
 // ── Treffpunkte (Locations) rendern + CRUD ─────────
 
 function renderTreffpunkte() {
+  // Karten-Grid wurde durch die einzelne Map ersetzt – Funktion ist nur noch Fallback
   const grid = document.getElementById("treffpunkteGrid");
-  if (!grid) return;
+  if (!grid) return; // Element existiert nicht mehr → nichts zu tun
 
   const sorted = (LOCATIONS || []).slice().sort((a, b) => (a.order || 99) - (b.order || 99));
 
@@ -979,7 +980,14 @@ function subscribeLocations() {
     } else {
       LOCATIONS = INITIAL_LOCATIONS.slice();
     }
-    renderTreffpunkte();
+    // Karte komplett neu aufbauen falls Locations geändert wurden
+    if (mapInstance) {
+      mapInstance.remove();
+      mapInstance = null;
+    }
+    if (currentTab === "treffpunkte") {
+      setTimeout(renderMapOverview, 50);
+    }
   });
 }
 
@@ -1582,7 +1590,151 @@ document.addEventListener("DOMContentLoaded", () => {
   initMemory();
   renderRecos();
   subscribeCheckins();
+  initTabs();
 });
+
+// ── Tab-Navigation ─────────────────────────────────
+
+const DEFAULT_TAB = "treffpunkte";
+let currentTab = null;
+
+function initTabs() {
+  const tabs = document.querySelectorAll("#mainTabs .tab");
+  const panels = document.querySelectorAll(".tab-panel");
+  if (!tabs.length || !panels.length) return;
+
+  function show(name) {
+    if (!name) name = DEFAULT_TAB;
+    let found = false;
+    panels.forEach(p => {
+      const isActive = p.dataset.tabPanel === name;
+      p.classList.toggle("active", isActive);
+      if (isActive) found = true;
+    });
+    if (!found) {
+      panels.forEach(p => p.classList.toggle("active", p.dataset.tabPanel === DEFAULT_TAB));
+      name = DEFAULT_TAB;
+    }
+    tabs.forEach(t => t.classList.toggle("tab--active", t.dataset.tab === name));
+    currentTab = name;
+    if (history.replaceState) history.replaceState(null, "", "#" + name);
+    if (name === "treffpunkte") {
+      setTimeout(() => renderMapOverview(), 60);
+    }
+    setTimeout(activateConsentedEmbeds, 100);
+  }
+
+  tabs.forEach(t => {
+    t.addEventListener("click", () => show(t.dataset.tab));
+  });
+
+  document.querySelectorAll("[data-tab-link]").forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      show(link.dataset.tabLink);
+      document.getElementById("navLinks")?.classList.remove("open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  document.querySelectorAll(".footer nav a[href^='#']").forEach(link => {
+    const target = link.getAttribute("href").slice(1);
+    if (document.querySelector(`[data-tab-panel="${target}"]`)) {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        show(target);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+  });
+
+  const initial = window.location.hash.slice(1) || DEFAULT_TAB;
+  show(initial);
+
+  window.addEventListener("hashchange", () => {
+    const h = window.location.hash.slice(1);
+    if (h) show(h);
+  });
+}
+
+// ── Karte: Übersicht mit allen Treffpunkten (Leaflet) ──
+
+let mapInstance = null;
+
+function renderMapOverview() {
+  const mapEl = document.getElementById("mapOverview");
+  if (!mapEl || typeof L === "undefined") return;
+  if (!LOCATIONS || !LOCATIONS.length) return;
+
+  if (mapInstance) {
+    setTimeout(() => mapInstance.invalidateSize(), 100);
+    return;
+  }
+
+  mapInstance = L.map(mapEl, {
+    scrollWheelZoom: false,
+    zoomControl: true,
+    tap: true
+  }).setView([53.55, 10.0], 11);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© <a href='https://openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a>",
+    maxZoom: 19
+  }).addTo(mapInstance);
+
+  const isTouch = window.matchMedia("(hover: none)").matches;
+  const hintText = isTouch ? "👆 Tippe mich" : "👆 Klick mich";
+
+  const bounds = [];
+  LOCATIONS.forEach(loc => {
+    if (!loc.lat || !loc.lng) return;
+    bounds.push([loc.lat, loc.lng]);
+
+    const icon = L.divIcon({
+      className: "map-pin",
+      html: `
+        <div class="map-pin__label">${escapeHtml(loc.name)}</div>
+        <div class="map-pin__marker" aria-hidden="true">
+          <svg viewBox="0 0 24 32" width="32" height="42">
+            <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
+                  fill="#c89233" stroke="#1e3a8a" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="5" fill="#fff"/>
+          </svg>
+        </div>`,
+      iconSize:   [140, 60],
+      iconAnchor: [70, 56]
+    });
+
+    const marker = L.marker([loc.lat, loc.lng], { icon, title: loc.name, riseOnHover: true }).addTo(mapInstance);
+    marker.bindTooltip(`${hintText} für Navigation`, {
+      direction: "top",
+      offset: [0, -45],
+      sticky: true,
+      opacity: 0.95
+    });
+    marker.on("click", () => openNavModalForLocation(loc));
+  });
+
+  if (bounds.length) {
+    mapInstance.fitBounds(bounds, { padding: [60, 60], maxZoom: 13 });
+  }
+}
+
+function openNavModalForLocation(loc) {
+  const modal = document.getElementById("navModal");
+  if (!modal) return;
+  const addrEl = document.getElementById("navModalAddress");
+  if (addrEl) {
+    addrEl.innerHTML = `<strong>${escapeHtml(loc.name)}</strong><br>📍 ${escapeHtml(loc.address || "")}${loc.schedule ? "<br>🗓️ " + escapeHtml(loc.schedule) : ""}`;
+  }
+  setNavLinks(modal, {
+    address: loc.address || loc.name,
+    lat: loc.lat || "",
+    lng: loc.lng || "",
+    name: loc.name
+  });
+  modal.classList.add("open");
+}
 
 // ── 🌤️ Wetter (Open-Meteo, kostenlos, kein API-Key) ──
 
@@ -1665,45 +1817,73 @@ function startMemory() {
   // 6 Paare = 12 Karten (4×3)
   const pairs = MEMORY_EMOJIS.slice(0, 6);
   const deck = [...pairs, ...pairs].sort(() => Math.random() - 0.5);
-  memoryState = { deck, flipped: [], moves: 0, matched: 0, startTime: Date.now(), interval: null };
+  if (memoryState?.interval) clearInterval(memoryState.interval);
+  memoryState = {
+    deck, flipped: [], moves: 0, matched: 0,
+    startTime: null,      // ← startet erst bei erster Karte
+    interval: null,
+    busy: false
+  };
   movesEl.textContent = "0";
   timeEl.textContent  = "0:00";
   winEl.hidden = true;
-  if (memoryState.interval) clearInterval(memoryState.interval);
-  memoryState.interval = setInterval(() => {
-    const sec = Math.floor((Date.now() - memoryState.startTime) / 1000);
-    timeEl.textContent = `${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}`;
-  }, 1000);
   board.innerHTML = deck.map((emoji, i) =>
-    `<button class="memory-card" data-i="${i}" data-emoji="${emoji}" type="button" aria-label="Karte ${i+1}"><span class="memory-card__inner"><span class="memory-card__back">🎴</span><span class="memory-card__front">${emoji}</span></span></button>`
+    `<button class="memory-card" data-i="${i}" data-emoji="${emoji}" type="button" aria-label="Karte ${i+1}">
+       <span class="memory-card__inner">
+         <span class="memory-card__face memory-card__back">🎴</span>
+         <span class="memory-card__face memory-card__front">${emoji}</span>
+       </span>
+     </button>`
   ).join("");
-  board.querySelectorAll(".memory-card").forEach(c => c.addEventListener("click", () => flipCard(c)));
+  board.querySelectorAll(".memory-card").forEach(c => {
+    c.addEventListener("click", () => flipCard(c));
+  });
 }
 
 function flipCard(card) {
+  if (!memoryState) return;
+  if (memoryState.busy) return;
   if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
-  if (memoryState.flipped.length === 2) return;
+
+  // Timer beim ersten Klick starten
+  if (!memoryState.startTime) {
+    memoryState.startTime = Date.now();
+    memoryState.interval = setInterval(() => {
+      const sec = Math.floor((Date.now() - memoryState.startTime) / 1000);
+      const t = document.getElementById("memoryTime");
+      if (t) t.textContent = `${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}`;
+    }, 1000);
+  }
+
   card.classList.add("flipped");
   memoryState.flipped.push(card);
+
   if (memoryState.flipped.length === 2) {
+    memoryState.busy = true;
     memoryState.moves++;
-    document.getElementById("memoryMoves").textContent = memoryState.moves;
+    const movesEl = document.getElementById("memoryMoves");
+    if (movesEl) movesEl.textContent = memoryState.moves;
     const [a, b] = memoryState.flipped;
     if (a.dataset.emoji === b.dataset.emoji) {
       setTimeout(() => {
-        a.classList.add("matched"); b.classList.add("matched");
+        a.classList.add("matched");
+        b.classList.add("matched");
         memoryState.flipped = [];
         memoryState.matched++;
+        memoryState.busy = false;
         if (memoryState.matched === 6) {
           clearInterval(memoryState.interval);
-          document.getElementById("memoryWin").hidden = false;
+          const win = document.getElementById("memoryWin");
+          if (win) win.hidden = false;
         }
-      }, 350);
+      }, 500);
     } else {
       setTimeout(() => {
-        a.classList.remove("flipped"); b.classList.remove("flipped");
+        a.classList.remove("flipped");
+        b.classList.remove("flipped");
         memoryState.flipped = [];
-      }, 900);
+        memoryState.busy = false;
+      }, 1000);
     }
   }
 }

@@ -20,6 +20,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
+  <!-- Leaflet (Karte) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <link rel="stylesheet" href="style.css" />
 
   <!-- Klaro Consent-Manager -->
@@ -53,13 +57,11 @@
         </button>
       </div>
       <ul class="nav__links" id="navLinks">
-        <li><a href="#aktuelles">Aktuelles</a></li>
-        <li><a href="#treffpunkte">Treffpunkte</a></li>
-        <li><a href="#termine">Termine</a></li>
-        <li><a href="#events">Events</a></li>
-        <li><a href="#galerie">Galerie</a></li>
-        <li><a href="#lernen">Lernen</a></li>
-        <li><a href="#kontakt">Kontakt</a></li>
+        <li><a href="#treffpunkte" data-tab-link="treffpunkte">📍 Treffpunkte</a></li>
+        <li><a href="#termine" data-tab-link="termine">📅 Termine</a></li>
+        <li><a href="#galerie" data-tab-link="galerie">📸 Galerie</a></li>
+        <li><a href="#lernen" data-tab-link="lernen">🎓 Lernen</a></li>
+        <li><a href="#kontakt" data-tab-link="kontakt">📧 Kontakt</a></li>
       </ul>
     </nav>
   </header>
@@ -85,6 +87,30 @@
     </div>
   </section>
 
+  <!-- ===== TAB-NAVIGATION ===== -->
+  <nav class="tabs" id="mainTabs" aria-label="Hauptbereiche">
+    <button type="button" class="tab" data-tab="treffpunkte">📍 <span>Treffpunkte</span></button>
+    <button type="button" class="tab" data-tab="termine">📅 <span>Termine</span></button>
+    <button type="button" class="tab" data-tab="galerie">📸 <span>Galerie</span></button>
+    <button type="button" class="tab" data-tab="lernen">🎓 <span>Lernen</span></button>
+    <button type="button" class="tab" data-tab="kontakt">📧 <span>Kontakt</span></button>
+  </nav>
+
+  <!-- ===== TAB: TREFFPUNKTE (große Karte mit allen Pins) ===== -->
+  <div class="tab-panel" data-tab-panel="treffpunkte" id="treffpunkte">
+    <section class="section">
+      <div class="container">
+        <h2 class="section__title">Unsere <span class="accent">Treffpunkte</span></h2>
+        <p class="section__sub">Klick / Tipp auf einen Pin für Navigation und Details.</p>
+        <div class="map-overview" id="mapOverview"></div>
+        <p class="map-overview__hint">💡 Bei Hover/Tipp auf den Pin siehst du eine Vorschau · Klick öffnet die Navigations-Auswahl.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== TAB: TERMINE (Aktuelles + Termine + Events) ===== -->
+  <div class="tab-panel" data-tab-panel="termine" id="termine-tab">
+
   <!-- ===== AKTUELLES (Telegram-Channel) ===== -->
   <section class="section" id="aktuelles">
     <div class="container">
@@ -103,17 +129,6 @@
             <span class="news-btn__small">Push-News &amp; alle Posts auf einen Blick</span>
           </span>
         </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== GOOGLE MAPS ÜBERSICHT ===== -->
-  <section class="section" id="treffpunkte">
-    <div class="container">
-      <h2 class="section__title">Unsere <span class="accent">Treffpunkte</span></h2>
-      <p class="section__sub">Einfach vorbeikommen, keine Anmeldung nötig!</p>
-      <div class="gmaps__grid" id="treffpunkteGrid">
-        <!-- Wird dynamisch aus Firebase gerendert -->
       </div>
     </div>
   </section>
@@ -140,6 +155,11 @@
     </div>
   </section>
 
+  </div><!-- /tab-panel termine -->
+
+  <!-- ===== TAB: GALERIE ===== -->
+  <div class="tab-panel" data-tab-panel="galerie" id="galerie-tab">
+
   <!-- ===== GALERIE (Instagram LightWidget) ===== -->
   <section class="section" id="galerie">
     <div class="container">
@@ -158,6 +178,11 @@
       </p>
     </div>
   </section>
+
+  </div><!-- /tab-panel galerie -->
+
+  <!-- ===== TAB: LERNEN & SPIELEN ===== -->
+  <div class="tab-panel" data-tab-panel="lernen" id="lernen-tab">
 
   <!-- ===== LERNEN & SPIELEN ===== -->
   <section class="section section--alt" id="lernen">
@@ -197,6 +222,11 @@
       </article>
     </div>
   </section>
+
+  </div><!-- /tab-panel lernen -->
+
+  <!-- ===== TAB: KONTAKT ===== -->
+  <div class="tab-panel" data-tab-panel="kontakt" id="kontakt-tab">
 
   <!-- ===== KONTAKT ===== -->
   <section class="section" id="kontakt">
@@ -254,6 +284,8 @@
       </form>
     </div>
   </section>
+
+  </div><!-- /tab-panel kontakt -->
 
   <!-- ===== NAV MODAL (Navigation-App-Auswahl) ===== -->
   <div class="install-modal nav-modal" id="navModal" role="dialog" aria-modal="true" aria-label="Navigation-App auswählen">
