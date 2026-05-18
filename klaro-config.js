@@ -44,10 +44,6 @@ window.klaroConfig = {
         external_content: { title: 'Externe Inhalte', description: 'Eingebettete Inhalte von Drittanbietern (Karten, Bilder, Posts).' }
       },
 
-      googlemaps: {
-        title: 'Google Maps',
-        description: 'Karten-Vorschau der fünf Stammtisch-Treffpunkte. Beim Aktivieren wird deine IP-Adresse an Google (USA) übertragen.'
-      },
       instagram: {
         title: 'Instagram (Behold-Widget)',
         description: 'Galerie-Feed mit Bildern unserer Treffen. Beim Aktivieren werden Daten an Behold und Instagram (Meta, USA) übertragen.'
@@ -56,14 +52,6 @@ window.klaroConfig = {
   },
 
   services: [
-    {
-      name: 'googlemaps',
-      purposes: ['external_content'],
-      required: false,
-      optOut: false,
-      onlyOnce: false,
-      cookies: []
-    },
     {
       name: 'instagram',
       purposes: ['external_content'],
