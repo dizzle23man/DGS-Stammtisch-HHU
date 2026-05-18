@@ -1241,6 +1241,7 @@ function initMap() {
 function initNav() {
   const burger = document.getElementById("burger");
   const links = document.getElementById("navLinks");
+  if (!burger || !links) return; // Burger wurde entfernt – nichts zu tun
 
   burger.addEventListener("click", () => {
     const open = burger.classList.toggle("open");
