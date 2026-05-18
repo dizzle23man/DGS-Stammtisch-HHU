@@ -52,17 +52,13 @@
           <span class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true">☀️</span>
           <span class="theme-toggle__icon theme-toggle__icon--dark"  aria-hidden="true">🌙</span>
         </button>
-        <button class="nav__burger" id="burger" aria-label="Menü öffnen" aria-expanded="false">
+        <!-- Burger entfernt: Tab-Bar dient als Navigation -->
+        <button class="nav__burger" id="burger" aria-label="Menü öffnen" aria-expanded="false" hidden>
           <span></span><span></span><span></span>
         </button>
       </div>
-      <ul class="nav__links" id="navLinks">
-        <li><a href="#treffpunkte" data-tab-link="treffpunkte">📍 Treffpunkte</a></li>
-        <li><a href="#termine" data-tab-link="termine">📅 Termine</a></li>
-        <li><a href="#galerie" data-tab-link="galerie">📸 Galerie</a></li>
-        <li><a href="#lernen" data-tab-link="lernen">🎓 Lernen</a></li>
-        <li><a href="#kontakt" data-tab-link="kontakt">📧 Kontakt</a></li>
-      </ul>
+      <!-- Top-Navigation entfernt - Tab-Bar unten reicht aus -->
+      <ul class="nav__links" id="navLinks" hidden></ul>
     </nav>
   </header>
 
@@ -72,10 +68,6 @@
       <img src="icons/logo.png" alt="DGS Stammtisch Hamburg & Umgebung" class="hero__logo" />
       <h1 class="hero__title">DGS Stammtisch<br><span class="accent">Hamburg &amp; Umgebung</span></h1>
       <p class="hero__sub">Trefft euch, tauscht euch aus und lernt gemeinsam – offen für Gehörlose, Schwerhörige, Hörende und alle, die Deutsche Gebärdensprache lieben.</p>
-      <div class="hero__cta">
-        <a href="#termine" class="btn btn--primary">Nächste Termine</a>
-        <a href="#treffpunkte" class="btn btn--outline">Treffpunkte ansehen</a>
-      </div>
       <div class="weather-widget" id="weatherWidget" aria-live="polite">
         <span class="weather-widget__loading">⛅ Wetter wird geladen …</span>
       </div>
@@ -91,6 +83,7 @@
   <nav class="tabs" id="mainTabs" aria-label="Hauptbereiche">
     <button type="button" class="tab" data-tab="treffpunkte">📍 <span>Treffpunkte</span></button>
     <button type="button" class="tab" data-tab="termine">📅 <span>Termine</span></button>
+    <button type="button" class="tab" data-tab="events">🎉 <span>Events</span></button>
     <button type="button" class="tab" data-tab="galerie">📸 <span>Galerie</span></button>
     <button type="button" class="tab" data-tab="lernen">🎓 <span>Lernen</span></button>
     <button type="button" class="tab" data-tab="kontakt">📧 <span>Kontakt</span></button>
@@ -144,8 +137,13 @@
     </div>
   </section>
 
+  </div><!-- /tab-panel termine -->
+
+  <!-- ===== TAB: EVENTS ===== -->
+  <div class="tab-panel" data-tab-panel="events" id="events-tab">
+
   <!-- ===== EVENTS ===== -->
-  <section class="section section--alt" id="events">
+  <section class="section">
     <div class="container">
       <h2 class="section__title">Besondere <span class="accent">Events</span></h2>
       <p class="section__sub">Workshops, Filmabende, Ausflüge und mehr.</p>
@@ -155,7 +153,7 @@
     </div>
   </section>
 
-  </div><!-- /tab-panel termine -->
+  </div><!-- /tab-panel events -->
 
   <!-- ===== TAB: GALERIE ===== -->
   <div class="tab-panel" data-tab-panel="galerie" id="galerie-tab">

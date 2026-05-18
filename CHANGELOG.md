@@ -4,6 +4,28 @@
 
 ---
 
+## 🎉 v4.5 — „Aufgeräumter Strukturumbau"
+> 🧹 Doppelte Menüs raus · 🎮 Memory funktioniert endlich · 📜 OSM-Datenschutz
+
+### 🛠️ Improvements
+- **Top-Navigation entfernt** — nur noch die Tab-Bar als Hauptnavigation (keine doppelten Menüs mehr)
+- **Hero-Buttons** „Nächste Termine" / „Treffpunkte ansehen" entfernt (Tab-Bar reicht)
+- **Burger-Menü** ausgeblendet
+- **Tab-Bar zentriert** unter dem Logo (auf Desktop, Mobile bleibt scrollbar)
+- **Termine und Events getrennt** — jetzt zwei eigene Tabs statt einem zusammen
+- **Memory-Karten** sind jetzt **deutlich größer** (max 640px Brett)
+
+### 🐛 Bug Fixes
+- **🎮 Memory-Spiel:** komplett umgebaut von 3D-Rotation auf **Opacity-Fade** — funktioniert jetzt zuverlässig auf allen Browsern (kein Flip-Bug mehr)
+- `pointer-events: none` auf Karten-Faces, damit Klicks immer am Button ankommen
+
+### 🔒 Datenschutz
+- **OpenStreetMap-Abschnitt** in `datenschutz.html` ergänzt (jetzt nutzt die Karte OSM-Tiles statt Google Maps)
+- Alter Google-Maps-Embed-Abschnitt durch kürzeren **„Externe Navigation"-Hinweis** ersetzt (da Google Maps nur noch als Link in der Navi-Auswahl auftaucht, kein Embed mehr)
+- **Klaro:** googlemaps-Service entfernt (kein Embed mehr), nur Instagram bleibt opt-in
+
+---
+
 ## 🎉 v4.4 — „Großer Strukturumbau"
 > 🗺️ Eine Karte für alle · 📑 Tabs statt endlosem Scroll · 🎮 Memory repariert
 
