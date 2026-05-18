@@ -4,6 +4,58 @@
 
 ---
 
+## 🎉 v4.4 — „Großer Strukturumbau"
+> 🗺️ Eine Karte für alle · 📑 Tabs statt endlosem Scroll · 🎮 Memory repariert
+
+### 🆕 New Features
+- **🗺️ Eine große Karte mit allen Pins** — statt 5 einzelner Google-Maps-Karten gibt's jetzt **eine** schicke Übersichtskarte mit OpenStreetMap (via Leaflet), allen 5 Treffpunkten als Custom-SVG-Pins
+- **🏷️ Pin-Labels** — Name des Treffpunkts schwebt immer über dem Pin (gold-blau im Branding)
+- **💬 Pin-Tooltip** — Hover (Desktop) / Lange-Tippen (Mobile) zeigt „Klick/Tippe mich für Navigation"
+- **🎚️ Slide-Up-Nav-Modal** — Auswahl Google Maps / Apple / Waze / Citymapper kommt jetzt **von unten als Rollo** rein (Mobile)
+- **📑 Tab-Navigation** — Seite ist in 5 Tabs unterteilt: 📍 Treffpunkte · 📅 Termine · 📸 Galerie · 🎓 Lernen · 📧 Kontakt
+- **🔗 Hash-Sync** — Tabs sind per URL ansteuerbar (`#galerie`, `#lernen` …) und werden geteilt-freundlich gemerkt
+
+### 🛠️ Improvements
+- **Sticky Tab-Bar** unter dem Hero — bleibt beim Scrollen oben
+- Tab-Wechsel mit sanfter Fade-Animation
+- Nav + Footer-Links jetzt mit Tab-System verbunden
+
+### 🐛 Bug Fixes
+- **🎮 Memory-Spiel:**
+  - Karten-Flip-Animation funktioniert jetzt zuverlässig (3D-Transform robuster)
+  - **Timer startet jetzt erst bei der ersten umgedrehten Karte** (vorher direkt beim Laden)
+  - Doppel-Klick-Schutz während Karten-Vergleich
+  - Match-Animation entfernt die störende `rotateY`-Konflikt-Animation
+- **🗓️ Termin korrigiert:** Lim's Buchholz war 15. Mai eingetragen — korrekt ist der **22. Mai 2026** (3. Freitag im Monat fällt diesen Monat anders, Christi Himmelfahrt-Brücken-Effekt)
+- **Service Worker** ignoriert jetzt `chrome-extension://` URLs (keine Cache-Fehler mehr in der Console)
+
+### 📐 Technische Details
+- Leaflet 1.9.4 + OpenStreetMap-Tiles wieder integriert (kostenlos, kein API-Key)
+- Custom `L.divIcon` für die Pins mit eingebettetem SVG
+- `mapInstance.fitBounds()` zoomt automatisch auf alle Standorte
+- Tab-Panels nutzen `display: none/block` + CSS-Animation
+
+---
+
+## 🎉 v4.3 — „Soft-Launch-Schutz"
+> 🚧 Under-Construction-Banner · 🍪 Klaro-Bug behoben · 🤖 Suchmaschinen-Sperre
+
+### 🆕 New Features
+- **⚠️ Under-Construction-Banner** ganz oben — gelb mit schwarzen Diagonalstreifen (klassischer Warntape-Look)
+- **🤖 robots.txt** + `<meta name="robots" content="noindex,nofollow">` — Suchmaschinen blockiert während Soft-Launch
+- **📋 CHANGELOG.md** als gamifierte Update-Historie
+
+### 🐛 Bug Fixes
+- **🍪 Klaro-Consent-Bug:** Maps lädt jetzt automatisch beim Reload, wenn der User vorher zugestimmt hat (vorher musste man manuell die Cookie-Einstellungen neu speichern)
+- **Service Worker:** `chrome-extension://`-Requests werden nicht mehr versucht zu cachen
+- Dreifache Klaro-Erkennung: API → Cookie → localStorage (robuster)
+
+### 🛠️ Improvements
+- Klaro-Reapply mehrmals nach Page-Load (300ms, 1.5s, 4s) als Sicherheitsnetz
+- Console-Logs für Debugging des Consent-Status
+
+---
+
 ## 🎉 v4.2 — „Rechtssicher-Update"
 > 🛡️ **DSGVO-Konformität + Impressum + Consent-Banner**
 
@@ -21,10 +73,15 @@
 - **Google-Maps-Iframes** nutzen `data-src` statt `src` (Klaro-kompatibel)
 - **Behold-Widget** als Klaro-Service registriert
 
-### 📝 To-Do für den Vereins-Admin
-- [ ] In `impressum.html` Platzhalter mit deinen echten Daten füllen (e-recht24.de-Generator)
-- [ ] In `datenschutz.html` Datum + ggf. Anpassungen ergänzen
-- [ ] AVVs bei Google Cloud + Cloudflare „akzeptieren" (1 Klick)
+### 📝 Verbleibende To-Dos
+- [ ] AVVs bei Google Cloud + Cloudflare formell „akzeptieren" (1 Klick)
+- [ ] Eigene Adresse in `impressum.html` / `datenschutz.html` ggf. anpassen, falls Umzug
+
+### ✅ Erledigt in diesem Update
+- ✅ Echtes Impressum mit Richard-Raul Pal (Wulffsblöcken 12, 22419 Hamburg) eingebaut
+- ✅ Vollständige Datenschutzerklärung mit allen 8 Diensten (Firebase, Cloudflare, Behold, Telegram, Open-Meteo, Klaro, Google Fonts, Google Maps)
+- ✅ Klaro Consent-Banner aktiv – blockiert Google Maps + Instagram bis zur Zustimmung
+- ✅ Admin-E-Mail auf `dgs.stammtisch_hhu@proton.me` umgestellt
 
 ---
 
