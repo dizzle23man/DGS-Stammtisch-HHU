@@ -764,7 +764,7 @@ function renderEvents() {
         <button type="button" class="card-btn card-btn--danger" data-action="delete-event" data-id="${e.id}" title="Löschen">🗑️</button>
       </div>` : "";
     const media = e.image
-      ? `<img class="event-card__img-real" src="${escapeHtml(e.image)}" alt="${escapeHtml(e.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'event-card__img\\'>${escapeHtml(e.emoji || "🎉").replace(/'/g,"")}</div>';" />`
+      ? `<img class="event-card__img-real" src="${escapeHtml(e.image)}" alt="${escapeHtml(e.title)}" loading="lazy" data-emoji-fallback="${escapeHtml(e.emoji || "🎉")}" />`
       : `<div class="event-card__img" aria-hidden="true">${escapeHtml(e.emoji || "🎉")}</div>`;
     return `
     <article class="event-card">
@@ -790,6 +790,17 @@ function renderEvents() {
       if (delBtn) { deleteEvent(delBtn.dataset.id); return; }
     });
   }
+
+  // Bild-Fehler-Fallback: bei 404 → Emoji statt kaputtem Bild
+  grid.querySelectorAll(".event-card__img-real").forEach(img => {
+    img.onerror = () => {
+      const fallback = document.createElement("div");
+      fallback.className = "event-card__img";
+      fallback.setAttribute("aria-hidden", "true");
+      fallback.textContent = img.dataset.emojiFallback || "🎉";
+      img.replaceWith(fallback);
+    };
+  });
 }
 
 // ── Admin: Events CRUD ─────────────────────────────
@@ -845,6 +856,12 @@ function openEventEditor(id = null) {
   document.getElementById("eventId").value = id || "";
   document.getElementById("eventModalTitle").textContent = id ? "Event bearbeiten" : "Neues Event";
 
+  // Preview & File-Input zurücksetzen
+  const fileInput = document.getElementById("eventImageFile");
+  const preview = document.getElementById("eventImagePreview");
+  if (fileInput) fileInput.value = "";
+  if (preview) preview.innerHTML = "";
+
   if (id) {
     const e = EVENTS.find(x => x.id === id);
     if (e) {
@@ -854,13 +871,70 @@ function openEventEditor(id = null) {
       document.getElementById("eventDesc").value  = e.desc || "";
       const imgEl = document.getElementById("eventImage");
       if (imgEl) imgEl.value = e.image || "";
+      if (preview && e.image) {
+        preview.innerHTML = `<img src="${escapeHtml(e.image)}" alt="Aktuelles Bild" /><span class="event-image-preview__label">Aktuelles Bild</span>`;
+      }
     }
   }
+
+  // Live-Preview beim Datei-Auswählen (inkl. Kompressions-Vorschau)
+  if (fileInput && preview && !fileInput.dataset.bound) {
+    fileInput.dataset.bound = "1";
+    fileInput.addEventListener("change", async () => {
+      const f = fileInput.files?.[0];
+      if (!f) { preview.innerHTML = ""; return; }
+      const origKB = Math.round(f.size / 1024);
+      preview.innerHTML = `<span class="event-image-preview__label">⏳ Verkleinere Bild …</span>`;
+      try {
+        const dataUrl = await compressImageToBase64(f);
+        const compKB = Math.round((dataUrl.length * 0.75) / 1024); // Base64-Overhead ≈ 33%
+        preview.innerHTML = `
+          <img src="${dataUrl}" alt="Vorschau" />
+          <span class="event-image-preview__label">🆕 Vorschau · Original ${origKB} KB → gespeichert ${compKB} KB</span>`;
+      } catch (err) {
+        preview.innerHTML = `<span class="event-image-preview__label" style="color:#dc2626">❌ ${err.message}</span>`;
+      }
+    });
+  }
+
   modal.classList.add("open");
 }
 
 function closeEventEditor() {
   document.getElementById("eventModal")?.classList.remove("open");
+}
+
+// Bild verkleinern (max 1400×1000) und als Base64-JPEG zurückgeben
+// So sparen wir massiv Speicher in Firebase & Ladezeit für Besucher
+function compressImageToBase64(file, opts = {}) {
+  const { maxW = 1400, maxH = 1000, quality = 0.82 } = opts;
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > maxW || h > maxH) {
+          const r = Math.min(maxW / w, maxH / h);
+          w = Math.round(w * r);
+          h = Math.round(h * r);
+        }
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#fff"; // weißer BG (falls PNG transparent)
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+          resolve(c.toDataURL("image/jpeg", quality));
+        } catch (err) { reject(err); }
+      };
+      img.onerror = () => reject(new Error("Bild konnte nicht gelesen werden"));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("Datei-Lesefehler"));
+    reader.readAsDataURL(file);
+  });
 }
 
 async function saveEventFromForm(ev) {
@@ -874,7 +948,33 @@ async function saveEventFromForm(ev) {
 
   if (!iso || !title || !desc) { alert("Datum, Titel und Beschreibung sind Pflicht."); return; }
 
-  const image = document.getElementById("eventImage")?.value.trim() || null;
+  // Bild: erst File-Upload probieren, sonst URL/Pfad aus Text-Feld
+  let image = document.getElementById("eventImage")?.value.trim() || null;
+  const fileInput = document.getElementById("eventImageFile");
+  const file = fileInput?.files?.[0];
+  const submitBtn = ev.target.querySelector('button[type="submit"]');
+  const origBtnText = submitBtn?.textContent;
+
+  if (file) {
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Bild ist zu groß (max. 10 MB Ausgangs-Datei).");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      alert("Nur Bild-Dateien erlaubt.");
+      return;
+    }
+    try {
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "⏳ Verkleinere Bild …"; }
+      image = await compressImageToBase64(file);
+    } catch (err) {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origBtnText; }
+      alert("Bild-Verarbeitung fehlgeschlagen: " + err.message);
+      return;
+    }
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origBtnText; }
+  }
+
   const data = {
     emoji, iso, title, desc,
     date: isoToFreeText(iso),

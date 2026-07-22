@@ -401,10 +401,14 @@
         <label class="admin-label">Beschreibung
           <textarea id="eventDesc" class="admin-input" rows="5" placeholder="Was passiert beim Event?" required></textarea>
         </label>
-        <label class="admin-label">Bild-Pfad (optional)
-          <input type="text" id="eventImage" class="admin-input" placeholder="z.B. icons/events/event-mai.jpg" />
+        <label class="admin-label">Bild hochladen (optional)
+          <input type="file" id="eventImageFile" class="admin-input" accept="image/*" />
         </label>
-        <p class="admin-modal__hint">💡 Bild zuerst in den <code>icons/events/</code>-Ordner laden, dann hier den Pfad eintragen. Wenn leer → Emoji wird gezeigt.</p>
+        <div id="eventImagePreview" class="event-image-preview"></div>
+        <label class="admin-label">… oder URL/Pfad eintragen
+          <input type="text" id="eventImage" class="admin-input" placeholder="https://… oder icons/events/event.jpg" />
+        </label>
+        <p class="admin-modal__hint">💡 Bild wird beim Speichern automatisch verkleinert (max. 1400 px) &amp; direkt in Firebase gespeichert. Alternativ URL/Pfad eintragen. Beides leer → Emoji.</p>
         <div class="admin-modal__actions">
           <button type="button" class="btn btn--outline" id="eventCancel">Abbrechen</button>
           <button type="submit" class="btn btn--primary">💾 Speichern</button>
