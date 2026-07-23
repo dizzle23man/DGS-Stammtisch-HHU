@@ -87,104 +87,10 @@ function updateAdminFab() {
 
 // ── Daten ──────────────────────────────────────────
 
-// Initial-Termine: werden beim ersten Admin-Login auf Knopfdruck nach Firebase übernommen.
-// Danach pflegt das Admin-Team alles direkt über die Website.
-const INITIAL_TERMINE = [
-  {
-    day: "07", month: "Mai", year: 2026,
-    title: "Markt König (Rindermarkthalle)",
-    info: "1. Donnerstag im Monat",
-    ort: "Rindermarkthalle, Hamburg",
-    tag: "Monatlich"
-  },
-  {
-    day: "14", month: "Mai", year: 2026,
-    title: "Peacetanbul",
-    info: "2. Donnerstag im Monat",
-    ort: "Peacetanbul, Hamburg",
-    tag: "Monatlich"
-  },
-  {
-    day: "21", month: "Mai", year: 2026,
-    title: "Villa im Park",
-    info: "3. Donnerstag im Monat",
-    ort: "Villa im Park, Hamburg",
-    tag: "Monatlich"
-  },
-  {
-    day: "22", month: "Mai", year: 2026,
-    title: "Lim's – Buchholz",
-    info: "3. Freitag im Monat",
-    ort: "Lim's, Buchholz",
-    tag: "Monatlich"
-  },
-  {
-    day: "28", month: "Mai", year: 2026,
-    title: "Barmbeker Schachcafé",
-    info: "4. Donnerstag im Monat",
-    ort: "Barmbeker Schachcafé, Hamburg",
-    tag: "Monatlich"
-  },
-  {
-    day: "04", month: "Jun", year: 2026,
-    title: "Markt König (Rindermarkthalle)",
-    info: "1. Donnerstag im Monat",
-    ort: "Rindermarkthalle, Hamburg",
-    tag: "Monatlich"
-  },
-  {
-    day: "11", month: "Jun", year: 2026,
-    title: "Peacetanbul",
-    info: "2. Donnerstag im Monat",
-    ort: "Peacetanbul, Hamburg",
-    tag: "Monatlich"
-  },
-  {
-    day: "18", month: "Jun", year: 2026,
-    title: "Villa im Park",
-    info: "3. Donnerstag im Monat",
-    ort: "Villa im Park, Hamburg",
-    tag: "Monatlich"
-  },
-  {
-    day: "19", month: "Jun", year: 2026,
-    title: "Lim's – Buchholz",
-    info: "3. Freitag im Monat",
-    ort: "Lim's, Buchholz",
-    tag: "Monatlich"
-  },
-  {
-    day: "25", month: "Jun", year: 2026,
-    title: "Barmbeker Schachcafé",
-    info: "4. Donnerstag im Monat",
-    ort: "Barmbeker Schachcafé, Hamburg",
-    tag: "Monatlich"
-  }
-];
-
 // Live-Termine aus Firebase (werden via subscribeTermine() aktualisiert)
-let TERMINE = INITIAL_TERMINE.slice();
+let TERMINE = [];
 
-const INITIAL_EVENTS = [
-  {
-    emoji: "📜",
-    date: "20. Mai 2026",
-    iso: "2026-05-20",
-    title: "Vortrag: Der Schwerbehindertenausweis",
-    desc: "Welche Voraussetzungen gibt es, wie läuft die Beantragung ab und welche Nachteilsausgleiche und Unterstützungsangebote sind damit verbunden? In diesem Vortrag erhaltet ihr einen kompakten Überblick über die wichtigsten Informationen rund um den Schwerbehindertenausweis sowie Raum für Fragen und Austausch.\n\n🎤 Referent: Jörg Winkler (HörBiz)\n🕕 18:00 – 19:30 Uhr\n📍 Saal im BdS, Wagnerstraße 42",
-    image: "icons/events/event-schwerbehindertenausweis.jpg"
-  },
-  {
-    emoji: "🎆",
-    date: "29. Mai 2026",
-    iso: "2026-05-29",
-    title: "Kirschblütenfest – Picknick & Feuerwerk",
-    desc: "Treffpunkt um 20:00 Uhr auf der Alsterwiese Schwanenwik. Feuerwerk zum Kirschblütenfest startet um 22:30 Uhr. Bringt eigene Getränke und Snacks mit – wir veranstalten ein gemeinsames Picknick!",
-    image: "icons/events/event-kirschbluete.jpg"
-  }
-];
-
-let EVENTS = INITIAL_EVENTS.slice();
+let EVENTS = [];
 
 // Telegram-Posts für die "Aktuelles"-Sektion
 // 👉 Neuer Post? Hier oben die ID einfügen (Format: "kanal/postid")
@@ -196,60 +102,7 @@ const TELEGRAM_POSTS = [
 const TELEGRAM_CHANNEL = "dgs_stammtisch_hhu";
 
 // Stammtische mit Koordinaten für die Karte
-const INITIAL_LOCATIONS = [
-  {
-    name: "Markt König (Rindermarkthalle)",
-    icon: "🥩", iconFile: "markt-koenig.png",
-    schedule: "1. Donnerstag im Monat",
-    address: "Neuer Kamp 31, 20359 Hamburg",
-    lat: 53.5566, lng: 9.9618,
-    phone: "040 43096135",
-    website: "https://markt-koenig.de",
-    order: 1
-  },
-  {
-    name: "Peacetanbul",
-    icon: "🌿", iconFile: "peacetanbul.png",
-    schedule: "2. Donnerstag im Monat",
-    address: "Jarrestraße 20, 22303 Hamburg",
-    lat: 53.5853, lng: 10.0269,
-    phone: "040 69644975",
-    website: "https://peacetanbul.de",
-    order: 2
-  },
-  {
-    name: "Villa im Park",
-    icon: "🌳", iconFile: "villa-im-park.png",
-    schedule: "3. Donnerstag im Monat",
-    address: "Else-Rauch-Platz 1, 20255 Hamburg",
-    lat: 53.5742, lng: 9.9447,
-    phone: "040 43208844",
-    website: "https://villa-im-park.de",
-    order: 3
-  },
-  {
-    name: "Lim's – Buchholz",
-    icon: "🎸", iconFile: "lims.png",
-    schedule: "3. Freitag im Monat",
-    address: "Breite Str. 10, 21244 Buchholz",
-    lat: 53.3236, lng: 9.8711,
-    phone: "04181 292011",
-    website: "https://lims-restaurant.de",
-    order: 4
-  },
-  {
-    name: "Barmbeker Schachcafé",
-    icon: "♟️", iconFile: "schachcafe.png",
-    schedule: "4. Donnerstag im Monat",
-    address: "Rübenkamp 227, 22307 Hamburg",
-    lat: 53.6004, lng: 10.0388,
-    phone: "040 67106144",
-    website: "https://barmbeker-schachcafe.de",
-    order: 5
-  }
-];
-
-let LOCATIONS = INITIAL_LOCATIONS.slice();
+let LOCATIONS = [];
 
 // Galerie-Platzhalter (Emoji + Beschriftung bis echte Fotos da sind)
 const GALLERY_ITEMS = [
@@ -301,7 +154,7 @@ function renderTermine() {
     });
 
   const adminToolbar = isAdmin
-    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="terminAddBtn">➕ Neuer Termin</button>${TERMINE.length === 0 ? ' <button class="btn btn--outline" id="initialMigrateBtn">📥 Initial-Daten laden</button>' : ''}</div>`
+    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="terminAddBtn">➕ Neuer Termin</button></div>`
     : "";
 
   if (!visible.length && !isAdmin) {
@@ -356,7 +209,6 @@ function renderTermine() {
 
   // Admin-Toolbar-Buttons
   document.getElementById("terminAddBtn")?.addEventListener("click", () => openTerminEditor());
-  document.getElementById("initialMigrateBtn")?.addEventListener("click", initialMigrate);
 
   // Re-attach RSVP- und Admin-Click-Listener
   if (!grid.dataset.bound) {
@@ -390,29 +242,11 @@ function subscribeTermine() {
   if (!db) return;
   onValue(ref(db, "termine"), snapshot => {
     const data = snapshot.val();
-    if (data && typeof data === "object") {
-      TERMINE = Object.entries(data).map(([id, t]) => ({ id, ...t }));
-    } else {
-      // Firebase noch leer → INITIAL_TERMINE als Fallback (nur Anzeige, nicht Firebase-gesichert)
-      TERMINE = INITIAL_TERMINE.slice();
-    }
+    TERMINE = (data && typeof data === "object")
+      ? Object.entries(data).map(([id, t]) => ({ id, ...t }))
+      : [];
     renderTermine();
   });
-}
-
-async function initialMigrate() {
-  if (!isAdmin || !db) return;
-  if (!confirm("Initial-Daten in Firebase laden? (10 Termine werden angelegt)")) return;
-  try {
-    for (const t of INITIAL_TERMINE) {
-      const newRef = push(ref(db, "termine"));
-      await set(newRef, { ...t, createdAt: serverTimestamp() });
-    }
-    alert("Fertig – Termine sind jetzt in Firebase. Du kannst sie ab jetzt direkt auf der Website verwalten.");
-  } catch (e) {
-    console.error(e);
-    alert("Fehler beim Hochladen: " + e.message);
-  }
 }
 
 function openTerminEditor(id = null) {
@@ -526,6 +360,7 @@ async function deleteTermin(id) {
   if (!confirm(`Termin "${t?.title}" am ${t?.day}. ${t?.month} wirklich löschen?`)) return;
   try {
     await remove(ref(db, `termine/${id}`));
+    await remove(ref(db, `rsvps/${terminId(t)}`));
   } catch (e) {
     alert("Löschen fehlgeschlagen: " + e.message);
   }
@@ -746,10 +581,19 @@ function renderEvents() {
   if (!grid) return;
 
   // Sortieren nach Datum (ISO oder Free-Text egal: ISO geht alphabetisch sauber)
-  const sorted = (EVENTS || []).slice().sort((a, b) => (a.iso || "").localeCompare(b.iso || ""));
+  // Events >30 Tage in der Vergangenheit werden komplett ausgeblendet, damit sich die Liste nicht endlos füllt.
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const hideCutoff = new Date(today); hideCutoff.setDate(hideCutoff.getDate() - 30);
+
+  const sorted = (EVENTS || [])
+    .filter(e => {
+      const d = new Date(e.iso);
+      return isNaN(d) || d >= hideCutoff;
+    })
+    .sort((a, b) => (a.iso || "").localeCompare(b.iso || ""));
 
   const adminToolbar = isAdmin
-    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="eventAddBtn">➕ Neues Event</button>${EVENTS.length === 0 ? ' <button class="btn btn--outline" id="eventInitBtn">📥 Initial-Daten laden</button>' : ''}</div>`
+    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="eventAddBtn">➕ Neues Event</button></div>`
     : "";
 
   if (!sorted.length && !isAdmin) {
@@ -763,9 +607,15 @@ function renderEvents() {
         <button type="button" class="card-btn" data-action="edit-event" data-id="${e.id}" title="Bearbeiten">✏️</button>
         <button type="button" class="card-btn card-btn--danger" data-action="delete-event" data-id="${e.id}" title="Löschen">🗑️</button>
       </div>` : "";
-    const media = e.image
-      ? `<img class="event-card__img-real" src="${escapeHtml(e.image)}" alt="${escapeHtml(e.title)}" loading="lazy" data-emoji-fallback="${escapeHtml(e.emoji || "🎉")}" />`
-      : `<div class="event-card__img" aria-hidden="true">${escapeHtml(e.emoji || "🎉")}</div>`;
+    // Vergangene Events (Datum < heute) zeigen einen Platzhalter statt des echten Bilds.
+    // Das echte Bild bleibt dabei unangetastet in Firebase gespeichert.
+    const eventDate = new Date(e.iso);
+    const isPast = !isNaN(eventDate) && eventDate < today;
+    const media = isPast
+      ? `<div class="event-card__img event-card__img--past" aria-hidden="true"><span>${escapeHtml(e.emoji || "🎉")}</span><span class="event-card__past-label">Event vorbei</span></div>`
+      : e.image
+        ? `<img class="event-card__img-real" src="${escapeHtml(e.image)}" alt="${escapeHtml(e.title)}" loading="lazy" data-emoji-fallback="${escapeHtml(e.emoji || "🎉")}" />`
+        : `<div class="event-card__img" aria-hidden="true">${escapeHtml(e.emoji || "🎉")}</div>`;
     return `
     <article class="event-card">
       ${adminBtns}
@@ -779,7 +629,6 @@ function renderEvents() {
   }).join("");
 
   document.getElementById("eventAddBtn")?.addEventListener("click", () => openEventEditor());
-  document.getElementById("eventInitBtn")?.addEventListener("click", initialMigrateEvents);
 
   if (!grid.dataset.bound) {
     grid.dataset.bound = "1";
@@ -809,27 +658,11 @@ function subscribeEvents() {
   if (!db) return;
   onValue(ref(db, "events"), snapshot => {
     const data = snapshot.val();
-    if (data && typeof data === "object") {
-      EVENTS = Object.entries(data).map(([id, e]) => ({ id, ...e }));
-    } else {
-      EVENTS = INITIAL_EVENTS.slice();
-    }
+    EVENTS = (data && typeof data === "object")
+      ? Object.entries(data).map(([id, e]) => ({ id, ...e }))
+      : [];
     renderEvents();
   });
-}
-
-async function initialMigrateEvents() {
-  if (!isAdmin || !db) return;
-  if (!confirm("Initial-Events in Firebase laden? (4 Events werden angelegt)")) return;
-  try {
-    for (const e of INITIAL_EVENTS) {
-      const newRef = push(ref(db, "events"));
-      await set(newRef, { ...e, iso: dateToIso(e.date), createdAt: serverTimestamp() });
-    }
-    alert("Fertig – Events sind jetzt in Firebase und können direkt auf der Website verwaltet werden.");
-  } catch (e) {
-    alert("Fehler beim Hochladen: " + e.message);
-  }
 }
 
 function dateToIso(freeText) {
@@ -1016,7 +849,7 @@ function renderTreffpunkte() {
   const sorted = (LOCATIONS || []).slice().sort((a, b) => (a.order || 99) - (b.order || 99));
 
   const adminToolbar = isAdmin
-    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="locationAddBtn">➕ Neuer Treffpunkt</button>${LOCATIONS.length === 0 ? ' <button class="btn btn--outline" id="locationInitBtn">📥 Initial-Daten laden</button>' : ''}</div>`
+    ? `<div class="admin-toolbar"><button class="btn btn--primary" id="locationAddBtn">➕ Neuer Treffpunkt</button></div>`
     : "";
 
   grid.innerHTML = adminToolbar + sorted.map(l => {
@@ -1054,7 +887,6 @@ function renderTreffpunkte() {
   }).join("");
 
   document.getElementById("locationAddBtn")?.addEventListener("click", () => openLocationEditor());
-  document.getElementById("locationInitBtn")?.addEventListener("click", initialMigrateLocations);
 
   if (!grid.dataset.bound) {
     grid.dataset.bound = "1";
@@ -1074,11 +906,9 @@ function subscribeLocations() {
   if (!db) return;
   onValue(ref(db, "locations"), snapshot => {
     const data = snapshot.val();
-    if (data && typeof data === "object") {
-      LOCATIONS = Object.entries(data).map(([id, l]) => ({ id, ...l }));
-    } else {
-      LOCATIONS = INITIAL_LOCATIONS.slice();
-    }
+    LOCATIONS = (data && typeof data === "object")
+      ? Object.entries(data).map(([id, l]) => ({ id, ...l }))
+      : [];
     // Karte komplett neu aufbauen falls Locations geändert wurden
     if (mapInstance) {
       mapInstance.remove();
@@ -1148,20 +978,6 @@ function activateConsentedEmbeds() {
 
 // Klaro-Apply auch von außen triggerbar (für inline-onclick)
 window.activateConsentedEmbeds = activateConsentedEmbeds;
-
-async function initialMigrateLocations() {
-  if (!isAdmin || !db) return;
-  if (!confirm("Initial-Treffpunkte in Firebase laden? (5 Stammtische werden angelegt)")) return;
-  try {
-    for (const l of INITIAL_LOCATIONS) {
-      const newRef = push(ref(db, "locations"));
-      await set(newRef, { ...l, createdAt: serverTimestamp() });
-    }
-    alert("Fertig – Treffpunkte sind jetzt in Firebase und können direkt auf der Website verwaltet werden.");
-  } catch (e) {
-    alert("Fehler beim Hochladen: " + e.message);
-  }
-}
 
 function openLocationEditor(id = null) {
   const modal = document.getElementById("locationModal");

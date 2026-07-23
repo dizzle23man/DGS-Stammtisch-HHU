@@ -736,6 +736,17 @@ a:hover { text-decoration: underline; }
   object-fit: cover;
   background: var(--bg-alt);
 }
+.event-card__img--past {
+  flex-direction: column;
+  gap: .35rem;
+  background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+  filter: grayscale(.4);
+}
+.event-card__past-label {
+  font-size: .8rem;
+  font-weight: 700;
+  color: #fff;
+}
 .event-card__body { padding: 1.25rem; }
 .event-card__date { color: var(--text-muted); font-size: .85rem; font-weight: 700; margin-bottom: .35rem; }
 .event-card__body h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: .5rem; }

@@ -4,6 +4,18 @@
 
 ---
 
+## 🛠️ v4.7 — „Admin-Bereich: Events & Termine bereinigt"
+> 🐛 Verschwindende Einträge behoben · 🗑️ Saubere RSVP-Löschung · 🖼️ "Event vorbei"-Anzeige
+
+### 🐛 Bug Fixes
+- **Verschwindende Events/Termine/Treffpunkte behoben** — die fest im Code hinterlegten Platzhalter-Einträge (ohne Firebase-Anbindung) sind entfernt. Die Seite zeigt jetzt immer zuverlässig genau den echten Firebase-Stand, auch wenn ein neuer Eintrag angelegt wird
+- **Verwaiste RSVPs beim Löschen eines Termins** werden jetzt mit entfernt, statt bei einem später neu angelegten Termin mit gleichem Datum/Titel wieder aufzutauchen
+
+### 🆕 New Features
+- **🖼️ "Event vorbei"-Anzeige**: Vergangene Events zeigen automatisch einen Platzhalter statt des echten Bilds (Bild bleibt dabei gespeichert). Events werden 30 Tage nach dem Termin ganz aus der Liste ausgeblendet
+
+---
+
 ## 🎉 v4.6 — „Mobile-Feinschliff & echte Events"
 > 📱 Tab-Scroll-Hinweis · 🎉 Erste echten Events · 🔗 Bessere Lern-Links
 
